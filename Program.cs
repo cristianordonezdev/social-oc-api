@@ -3,27 +3,29 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using social_oc_api.Data;
+using social_oc_api.Models.Domain;
 using social_oc_api.Repositories;
+using social_oc_api.Utils;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDataProtection(); // Asegúrate de agregar esta línea
+builder.Services.AddDataProtection();
+
 
 // Configurar el DbContext antes de construir la aplicación
 builder.Services.AddDbContext<SocialOCDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentityCore<IdentityUser>()
-    .AddRoles<IdentityRole>()
-    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("SocialCloneTokenProvider")
+// Cambia a AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<SocialOCDBContext>()
     .AddDefaultTokenProviders();
 
+// Configuración de opciones de identidad
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = false;
@@ -48,8 +50,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     });
 
-
 builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
+builder.Services.AddScoped<IUtils, Utils>();
 
 var app = builder.Build();
 
