@@ -6,12 +6,19 @@ namespace social_oc_api.Models.DTO.Auth
     {
         [Required]
         [DataType(DataType.EmailAddress)]
-        public string Username { get; set; }
+        public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+   
+        [Required]
+        [MaxLength(255)]
+        public string Name { get; set; }
 
-        public string[] Roles { get; set; }
+        [Required]
+        public string Username { get; set; }
+
+
     }
 }

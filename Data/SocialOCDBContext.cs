@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using social_oc_api.Models.Domain;
 
 namespace social_oc_api.Data
 {
-    public class SocialOCDBContext : IdentityDbContext<IdentityUser>
+    public class SocialOCDBContext : IdentityDbContext<ApplicationUser>
     {
         public SocialOCDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
         {   
