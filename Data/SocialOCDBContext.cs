@@ -14,6 +14,13 @@ namespace social_oc_api.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<ApplicationUser>()
+                .HasIndex(u => u.UserName)
+                .IsUnique();
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
 
             //seed data for roles and users
             var readerRoleId = "d5223cbc-9bdc-4088-ae3b-345e281c571b";
