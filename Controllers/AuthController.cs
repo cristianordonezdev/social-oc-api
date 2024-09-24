@@ -5,6 +5,9 @@ using social_oc_api.Models.DTO.Auth;
 using social_oc_api.Models.Domain;
 using social_oc_api.Utils;
 using social_oc_api.Models.Responses;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace social_oc_api.Controllers
 {
@@ -78,29 +81,76 @@ namespace social_oc_api.Controllers
                 var checkPassword = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
                 if (checkPassword)
                 {
-                    // Generate token
-
                     var roles = await userManager.GetRolesAsync(user);
                     if (roles != null)
                     {
-                        var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList());
+                        var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 15);
+                        var refreshToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 1);
+
+                        // Almacenar el refreshToken en la base de datos o cache (aquí debes implementar el almacenamiento seguro)
+                        if (!string.IsNullOrEmpty(user.Id))
+                        {
+                           await tokenRepository.SaveRefreshToken(user.Id, refreshToken);
+                        }
 
                         var response = new LoginResponseDto
                         {
                             Token = jwtToken,
-                            NameUser = user.UserName,
+                            RefreshToken = refreshToken,
+                            NameUser = user.UserName
                         };
 
                         return Ok(response);
                     }
-
                 }
             }
 
             ModelState.AddModelError("Login", "Invalid email or password");
-            var errorResponse = _utils.BuildErrorResponse(ModelState);
-
-            return BadRequest(errorResponse);
+            return BadRequest(_utils.BuildErrorResponse(ModelState));
         }
+
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken(TokenRefreshRequest tokenRequest)
+        {
+            var principal = tokenRepository.GetPrincipalFromExpiredToken(tokenRequest.Token);
+            if (principal == null)
+            {
+                ModelState.AddModelError("Refresh Token", "Invalid refresh token");
+                return BadRequest(_utils.BuildErrorResponse(ModelState));
+            }
+            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var savedRefreshToken = await tokenRepository.GetRefreshToken(new Guid(userId), tokenRequest.Token);
+            if (savedRefreshToken == null)
+            {
+                return NotFound();
+            }
+
+            if (savedRefreshToken.ExpiresAt < DateTime.Now)
+            {
+                ModelState.AddModelError("Refresh Token", "Expired refresh token");
+                return BadRequest(_utils.BuildErrorResponse(ModelState));
+            }
+
+            return Ok(savedRefreshToken.ExpiresAt +"-"+ DateTime.Now);
+
+            /*
+
+            // Generar un nuevo JWT
+            var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 15);
+            var refreshToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 10080);
+
+            // Actualizar el refresh token en la base de datos
+            *//* savedRefreshToken.IsRevoked = true;  // Invalida el token anterior
+             await SaveRefreshTokenToDb(user.Id, newRefreshToken);*//*
+
+            return Ok(new
+            {
+                token = newJwtToken,
+                refreshToken = newRefreshToken
+            });*/
+        }
+
     }
 }

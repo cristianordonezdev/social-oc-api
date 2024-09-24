@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using social_oc_api.Models.Domain;
+using social_oc_api.Models.Domain.Auth;
 
 namespace social_oc_api.Data
 {
@@ -10,6 +11,8 @@ namespace social_oc_api.Data
         public SocialOCDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
         {   
         }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         {
