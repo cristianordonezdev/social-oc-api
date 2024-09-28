@@ -93,7 +93,7 @@ namespace social_oc_api.Repositories
                 {
                     UserId = new Guid(UserId),
                     Token = Token,
-                    ExpiresAt = DateTime.Now.AddMinutes(1),
+                    ExpiresAt = DateTime.Now.AddMinutes(10080),
                     IsRevoked = false
                 };
 
@@ -101,7 +101,7 @@ namespace social_oc_api.Repositories
             } else
             {
                 userToken.Token = Token;
-                userToken.ExpiresAt = DateTime.Now.AddMinutes(1);
+                userToken.ExpiresAt = DateTime.Now.AddMinutes(10080);
             }
 
             await _db_context.SaveChangesAsync();
