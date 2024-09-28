@@ -8,6 +8,8 @@ using social_oc_api.Models.Responses;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 
 namespace social_oc_api.Controllers
 {
@@ -157,6 +159,56 @@ namespace social_oc_api.Controllers
             }
 
             ModelState.AddModelError("Refresh Token", "Something wrong happened");
+            return BadRequest(_utils.BuildErrorResponse(ModelState));
+        }
+
+        [HttpGet]
+        [Route("GoogleLogin")]
+        public IActionResult GoogleLogin(string redirectUri)
+        {
+            var redirectUrl = Url.Action("GoogleResponse", "Auth", new { redirectUri }, Request.Scheme);
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        [Route("GoogleResponse")]
+        public async Task<IActionResult> GoogleResponse(string redirectUri)
+        {
+            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            if (result.Succeeded)
+            {
+                var claims = result.Principal.Claims.ToList();
+                var user = new ApplicationUser
+                {
+                    UserName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+                    Email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+                    Name = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
+                };
+
+                var userFromDb = await userManager.FindByEmailAsync(user.Email);
+                if (userFromDb == null) { NotFound(); }
+
+                // Verifica si el usuario ya existe, si no, crea uno nuevo.
+                var existingUser = await userManager.FindByEmailAsync(user.Email);
+                if (existingUser == null)
+                {
+                    await userManager.CreateAsync(user);
+                    await userManager.AddToRoleAsync(user, "Reader");
+                }
+
+                var roles = await userManager.GetRolesAsync(user);
+                var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 1440);
+                var refreshToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 10080);
+
+                await tokenRepository.SaveRefreshToken(userFromDb.Id, refreshToken);
+                
+
+                return Ok(new { Token = jwtToken, RefreshToken = refreshToken, NameUser = user.UserName });
+            }
+
+
+            ModelState.AddModelError("Login Google", "Login Failed");
             return BadRequest(_utils.BuildErrorResponse(ModelState));
         }
 
