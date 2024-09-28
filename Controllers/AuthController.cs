@@ -84,10 +84,9 @@ namespace social_oc_api.Controllers
                     var roles = await userManager.GetRolesAsync(user);
                     if (roles != null)
                     {
-                        var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 15);
-                        var refreshToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 1);
+                        var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 1440);
+                        var refreshToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 10080);
 
-                        // Almacenar el refreshToken en la base de datos o cache (aquí debes implementar el almacenamiento seguro)
                         if (!string.IsNullOrEmpty(user.Id))
                         {
                            await tokenRepository.SaveRefreshToken(user.Id, refreshToken);
@@ -133,23 +132,32 @@ namespace social_oc_api.Controllers
                 return BadRequest(_utils.BuildErrorResponse(ModelState));
             }
 
-            return Ok(savedRefreshToken.ExpiresAt +"-"+ DateTime.Now);
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null) { return NotFound(); }
 
-            /*
-
-            // Generar un nuevo JWT
-            var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 15);
-            var refreshToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 10080);
-
-            // Actualizar el refresh token en la base de datos
-            *//* savedRefreshToken.IsRevoked = true;  // Invalida el token anterior
-             await SaveRefreshTokenToDb(user.Id, newRefreshToken);*//*
-
-            return Ok(new
+            var roles = await userManager.GetRolesAsync(user);
+            if (roles != null)
             {
-                token = newJwtToken,
-                refreshToken = newRefreshToken
-            });*/
+                var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 1440);
+                var refreshToken = tokenRepository.CreateJWTToken(user, roles.ToList(), 10080);
+
+                if (!string.IsNullOrEmpty(user.Id))
+                {
+                    await tokenRepository.SaveRefreshToken(user.Id, refreshToken);
+                }
+
+                var response = new LoginResponseDto
+                {
+                    Token = jwtToken,
+                    RefreshToken = refreshToken,
+                    NameUser = user.UserName
+                };
+
+                return Ok(response);
+            }
+
+            ModelState.AddModelError("Refresh Token", "Something wrong happened");
+            return BadRequest(_utils.BuildErrorResponse(ModelState));
         }
 
     }
