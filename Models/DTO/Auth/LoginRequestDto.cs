@@ -6,7 +6,7 @@ namespace social_oc_api.Models.DTO.Auth
     {
         [Required]
         [DataType(DataType.EmailAddress)]
-        public string Username { get; set; }
+        public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

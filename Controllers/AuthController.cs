@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 
 namespace social_oc_api.Controllers
 {
@@ -77,7 +79,7 @@ namespace social_oc_api.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
-            var user = await userManager.FindByEmailAsync(loginRequestDto.Username);
+            var user = await userManager.FindByEmailAsync(loginRequestDto.Email);
             if (user != null)
             {
                 var checkPassword = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
@@ -160,6 +162,28 @@ namespace social_oc_api.Controllers
 
             ModelState.AddModelError("Refresh Token", "Something wrong happened");
             return BadRequest(_utils.BuildErrorResponse(ModelState));
+        }
+
+
+        [HttpGet]
+        [Route("user")]
+        [Authorize]
+        public async Task<IActionResult> GetUser()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var user = await userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
         }
 
         [HttpGet]
