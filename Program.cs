@@ -10,6 +10,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Agregar servicios a la aplicación
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -19,7 +20,7 @@ builder.Services.AddDataProtection();
 builder.Services.AddDbContext<SocialOCDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Cambia a AddIdentity<ApplicationUser, IdentityRole>()
+// Configurar Identity con la entidad ApplicationUser
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<SocialOCDBContext>()
     .AddDefaultTokenProviders();
@@ -35,16 +36,15 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredUniqueChars = 1;
 });
 
-// Configuración de Google
-builder.Services.AddAuthentication().AddGoogle(options =>
+// Configuración de autenticación
+builder.Services.AddAuthentication(options =>
 {
-    options.ClientId = builder.Configuration["Google:ClientId"];
-    options.ClientSecret = builder.Configuration["Google:ClientSecret"];
-    options.CallbackPath = "/api/auth/google/callback/";
-});
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    // Esquema por defecto (JWT)
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -53,15 +53,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    });
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+        ClockSkew = TimeSpan.Zero
+    };
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Google:ClientSecret"];
+    options.CallbackPath = "/api/auth/google/callback/";
+});
 
+// Inyectar dependencias personalizadas
 builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
 builder.Services.AddScoped<IUtils, Utils>();
 
 var app = builder.Build();
 
+// Configurar middlewares en el pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -70,8 +79,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
+// Mapea los controladores
 app.MapControllers();
 
 app.Run();
