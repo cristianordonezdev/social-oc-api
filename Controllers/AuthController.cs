@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 namespace social_oc_api.Controllers
 {
@@ -22,12 +23,14 @@ namespace social_oc_api.Controllers
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ITokenRepository tokenRepository;
         private readonly IUtils _utils;
+        private readonly IMapper _mapper;
 
-        public AuthController(UserManager<ApplicationUser> userManager, ITokenRepository tokenRepository, IUtils utils)
+        public AuthController(UserManager<ApplicationUser> userManager, ITokenRepository tokenRepository, IUtils utils, IMapper mapper)
         {
             this.userManager = userManager;
             this.tokenRepository = tokenRepository;
             this._utils = utils;
+            this._mapper = mapper;
         }
 
         [HttpPost]
@@ -182,8 +185,7 @@ namespace social_oc_api.Controllers
             {
                 return NotFound();
             }
-
-            return Ok(user);
+            return Ok(_mapper.Map<UserDto>(user));
         }
 
         [HttpGet]

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using social_oc_api.Data;
+using social_oc_api.Mappings;
 using social_oc_api.Models.Domain;
 using social_oc_api.Repositories;
 using social_oc_api.Utils;
@@ -66,7 +67,12 @@ builder.Services.AddAuthentication(options =>
 
 // Inyectar dependencias personalizadas
 builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
+builder.Services.AddScoped<IPostRepository, SQLPostRepository>();
 builder.Services.AddScoped<IUtils, Utils>();
+
+//REGISTERING MAPPING ==========================================
+builder.Services.AddAutoMapper(typeof(MainAutoMapper));
+// ================================================================
 
 var app = builder.Build();
 
