@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using social_oc_api.Models.Domain;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace social_oc_api.Models.DTO.Posts
 {
@@ -13,6 +14,6 @@ namespace social_oc_api.Models.DTO.Posts
 
         public DateTime? UpdatedAt { get; set; }
 
-/*        public List<> Files { get; set; }
-*/    }
+        public List<ImageDto> Files { get; set; }
+    }
 }

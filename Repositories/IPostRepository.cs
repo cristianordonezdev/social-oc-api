@@ -7,8 +7,9 @@ namespace social_oc_api.Repositories
 {
     public interface IPostRepository
     {
-        Task<Post> CreatePost(Post post);
+        Task<Post> CreatePost(Post post, List<IFormFile> files);
         Task<List<Post>> GetPostsHome();
 
+        Task<List<Post>> GetPostsOf(Guid userId);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using social_oc_api.Models.Errors;
 
 namespace social_oc_api.Utils
@@ -6,6 +7,13 @@ namespace social_oc_api.Utils
     public class Utils : IUtils
 
     {
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public Utils(IWebHostEnvironment webHostEnvironment)
+        {
+            _webHostEnvironment = webHostEnvironment;
+        }
+
         public ErrorResponse BuildErrorResponse(ModelStateDictionary modelState)
         {
             var errorResponse = new ErrorResponse
@@ -21,6 +29,36 @@ namespace social_oc_api.Utils
                     )
             };
             return errorResponse;
+        }
+
+        public void DeleteImageFromFolder(string imageName)
+        {
+            string[] segments = imageName.Split('/');
+            string folderPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Images");
+            string filePath = Path.Combine(folderPath, segments[^1]);
+
+            if (File.Exists(filePath))
+            {
+                Console.Write("=======================================================================DELETED");
+                File.Delete(filePath);
+            }
+        }
+        public void ValidateFileUpload(List<IFormFile> files, ModelStateDictionary modelState)
+        {
+            var allowedExtension = new string[] { ".jpg", ".jpeg", ".png" };
+
+            foreach (var file in files)
+            {
+                if (!allowedExtension.Contains(Path.GetExtension(file.FileName)))
+                {
+                    modelState.AddModelError("file", "Unsupported file extension");
+                }
+
+                if (file.Length > 5242880)
+                {
+                    modelState.AddModelError("File", "File size more than 5MB, please upload a smaller file");
+                }
+            }
         }
     }
 

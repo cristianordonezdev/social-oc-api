@@ -15,9 +15,14 @@ namespace social_oc_api.Mappings
             CreateMap<PostCreateDto, Post>().ReverseMap();
             CreateMap<Post, PostDto>().ReverseMap();
 
-            CreateMap<IFormFile, Image>()
-                .ForMember(dest => dest.FilePath, opt => opt.Ignore()) // Ignora FilePath por ahora
-                .ForMember(dest => dest.File, opt => opt.MapFrom(src => src)); // Mapea el IFormFile directamente
+            // Mapeo del Post a PostDto
+            CreateMap<Post, PostDto>()
+                .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.Files));
+
+            // Mapeo del File a FileDto (solo Id y FilePath)
+            CreateMap<Image, ImageDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.FilePath));
         }
     }
 }
