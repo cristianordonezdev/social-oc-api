@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using social_oc_api.Data;
 using social_oc_api.Mappings;
@@ -68,6 +69,7 @@ builder.Services.AddAuthentication(options =>
 // Inyectar dependencias personalizadas
 builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
 builder.Services.AddScoped<IPostRepository, SQLPostRepository>();
+builder.Services.AddScoped<IImageRepository, SQLImageRepository>();
 builder.Services.AddScoped<IUtils, Utils>();
 
 //REGISTERING MAPPING ==========================================
@@ -87,6 +89,15 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+
+// Configuration to save IMAGES/STATIC FILES  =================================´
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+    RequestPath = "/Images"
+});
+// ====================================================================
 
 // Mapea los controladores
 app.MapControllers();
