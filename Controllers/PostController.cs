@@ -49,8 +49,17 @@ namespace social_oc_api.Controllers
         [Authorize]
         public async Task<IActionResult> getPostsHome()
         {
-            var postsDomain = await _postRepository.GetPostsHome();
-            return Ok(_mapper.Map<List<PostDto>>(postsDomain));
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId != null)
+            {
+                var postsDomain = await _postRepository.GetPostsHome(new Guid(userId));
+                return Ok(_mapper.Map<List<PostDto>>(postsDomain));
+            }
+
+            ModelState.AddModelError("Home post", "Something wrong happened when it was trying to get home posts");
+            var errorResponse = _utils.BuildErrorResponse(ModelState);
+
+            return BadRequest(errorResponse);
         }
 
         [HttpGet]

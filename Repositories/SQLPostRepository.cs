@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using social_oc_api.Data;
 using social_oc_api.Models.Domain;
+using System.Linq;
 
 namespace social_oc_api.Repositories
 {
@@ -40,15 +41,46 @@ namespace social_oc_api.Repositories
         }
 
         // Post of Home, of followers
-        public async Task<List<Post>> GetPostsHome()
+        public async Task<List<Post>> GetPostsHome(Guid ownUserId)
         {
-            var posts = await _dbContext.Posts.ToListAsync();
-            return posts;
+            var followersIds = await _dbContext.Followers
+               .Where(f => f.FollowerId == ownUserId)
+               .Select(f => f.FollowingId)
+               .ToListAsync();
+
+            var postsWithImages = await _dbContext.Posts
+                .Where(post => followersIds.Contains(post.UserId))
+                .Select(post => new Post
+                {
+                    Id = post.Id,
+                    UserId = post.UserId,
+                    Files = _dbContext.Images
+                        .Where(image => image.ReferenceId == post.Id)
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return postsWithImages;
         }
 
         public async Task<List<Post>> GetPostsOf(Guid userId)
         {
-            var posts = await _dbContext.Posts.Where(post => post.UserId == userId).ToListAsync();
+            var postsWithImages = await _dbContext.Posts
+                .Where(post => post.UserId == userId)
+                .Select(post => new
+                {
+                    Post = post,
+                    Images = _dbContext.Images
+                        .Where(image => image.ReferenceId == post.Id)
+                        .ToList()
+                })
+                .ToListAsync();
+
+            var posts = postsWithImages.Select(pwi =>
+            {
+                pwi.Post.Files = pwi.Images;
+                return pwi.Post;
+            }).ToList();
             return posts;   
         }
     }
