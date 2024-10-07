@@ -39,13 +39,12 @@ namespace social_oc_api.Utils
 
             if (File.Exists(filePath))
             {
-                Console.Write("=======================================================================DELETED");
                 File.Delete(filePath);
             }
         }
         public void ValidateFileUpload(List<IFormFile> files, ModelStateDictionary modelState)
         {
-            var allowedExtension = new string[] { ".jpg", ".jpeg", ".png" };
+            var allowedExtension = new string[] { ".jpg", ".jpeg", ".png", ".mp4" };
 
             foreach (var file in files)
             {
@@ -54,9 +53,9 @@ namespace social_oc_api.Utils
                     modelState.AddModelError("file", "Unsupported file extension");
                 }
 
-                if (file.Length > 5242880)
+                if (file.Length > 10485760)
                 {
-                    modelState.AddModelError("File", "File size more than 5MB, please upload a smaller file");
+                    modelState.AddModelError("File", "File size more than 10MB, please upload a smaller file");
                 }
             }
         }

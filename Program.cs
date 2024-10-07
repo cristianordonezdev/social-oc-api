@@ -70,6 +70,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
 builder.Services.AddScoped<IPostRepository, SQLPostRepository>();
 builder.Services.AddScoped<IImageRepository, SQLImageRepository>();
+builder.Services.AddScoped<IFollowerRepository, SQLFollowerRepository>();
 builder.Services.AddScoped<IUtils, Utils>();
 
 //REGISTERING MAPPING ==========================================
