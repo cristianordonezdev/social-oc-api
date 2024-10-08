@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using social_oc_api.Data;
 
@@ -11,9 +12,11 @@ using social_oc_api.Data;
 namespace social_oc_api.Migrations
 {
     [DbContext(typeof(SocialOCDBContext))]
-    partial class SocialOCDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241007044950_changingTablePostImages")]
+    partial class changingTablePostImages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -395,17 +398,12 @@ namespace social_oc_api.Migrations
             modelBuilder.Entity("social_oc_api.Models.Domain.PostImage", b =>
                 {
                     b.HasOne("social_oc_api.Models.Domain.Post", "Post")
-                        .WithMany("PostImages")
+                        .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>
-                {
-                    b.Navigation("PostImages");
                 });
 #pragma warning restore 612, 618
         }

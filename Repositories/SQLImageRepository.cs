@@ -24,20 +24,20 @@ namespace social_oc_api.Repositories
         }
         public async Task<Image?> DeleteImage(Guid Id)
         {
-            var imageDomain = await _dbContext.Images.FirstOrDefaultAsync(item => item.Id == Id);
+            var imageDomain = await _dbContext.PostImages.FirstOrDefaultAsync(item => item.Id == Id);
             if (imageDomain == null)
             {
                 return null;
             }
             _utils.DeleteImageFromFolder(imageDomain.FilePath);
 
-            _dbContext.Images.Remove(imageDomain);
+            _dbContext.PostImages.Remove(imageDomain);
             await _dbContext.SaveChangesAsync();
 
             return imageDomain;
         }
 
-        public async Task<Image> UploadImage(Image image)
+        public async Task<Image> UploadImage(PostImage image, string type)
         {
             string unique_name = GenerateUniqueFileName();
             string extensionImage = Path.GetExtension(image.File.FileName);
@@ -52,9 +52,13 @@ namespace social_oc_api.Repositories
             // https://localhost:1234/images/image.jpg
             var urlFilePath = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}{_httpContextAccessor.HttpContext.Request.PathBase}/Images/{unique_name}{extensionImage}";
             image.FilePath = urlFilePath;
-
+            
             // Add Image to the images table
-            await _dbContext.Images.AddAsync(image);
+            if (type == "PostImages")
+            {
+                await _dbContext.PostImages.AddAsync(image);
+
+            }
             await _dbContext.SaveChangesAsync();
 
             return image;

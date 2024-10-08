@@ -14,6 +14,6 @@ namespace social_oc_api.Models.DTO.Posts
 
         public DateTime? UpdatedAt { get; set; }
 
-        public List<ImageDto> Files { get; set; }
+        public List<ImageDto> Images { get; set; }
     }
 }
