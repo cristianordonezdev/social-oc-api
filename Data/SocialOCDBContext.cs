@@ -14,7 +14,7 @@ namespace social_oc_api.Data
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Post> Posts { get; set; }
-        public DbSet<Image> Images { get; set; }
+        public DbSet<PostImage> PostImages { get; set; }
         public DbSet<Follower> Followers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
@@ -27,6 +27,12 @@ namespace social_oc_api.Data
             modelBuilder.Entity<ApplicationUser>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<Post>()
+                    .HasMany(p => p.PostImages)
+                    .WithOne(pi => pi.Post)
+                    .HasForeignKey(pi => pi.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
             //seed data for roles and users
             var readerRoleId = "d5223cbc-9bdc-4088-ae3b-345e281c571b";

@@ -14,8 +14,6 @@ namespace social_oc_api.Models.Domain
 
         public DateTime? UpdatedAt { get; set; }
 
-
-        [NotMapped]
-        public required List<Image> Files { get; set; } = new List<Image>();
+        public ICollection<PostImage> PostImages { get; set; }
     }
 }

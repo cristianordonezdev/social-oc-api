@@ -17,7 +17,7 @@ namespace social_oc_api.Mappings
 
             // Mapeo del Post a PostDto
             CreateMap<Post, PostDto>()
-                .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.Files));
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.PostImages));
 
             // Mapeo del File a FileDto (solo Id y FilePath)
             CreateMap<Image, ImageDto>()

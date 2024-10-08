@@ -13,7 +13,13 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Agregar servicios a la aplicación
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true; // Opcional para mejor formato
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDataProtection();

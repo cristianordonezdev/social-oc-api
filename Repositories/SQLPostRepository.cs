@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using social_oc_api.Data;
 using social_oc_api.Models.Domain;
+using social_oc_api.Utils;
 using System.Linq;
 
 namespace social_oc_api.Repositories
@@ -9,10 +10,12 @@ namespace social_oc_api.Repositories
     {
         private readonly SocialOCDBContext _dbContext;
         private readonly IImageRepository _imageRepository;
-        public SQLPostRepository(SocialOCDBContext dbContext, IImageRepository imageRepository)
+        private readonly IUtils _utils;
+        public SQLPostRepository(SocialOCDBContext dbContext, IImageRepository imageRepository, IUtils utils)
         {
             _dbContext = dbContext;
             _imageRepository = imageRepository;
+            _utils = utils;
         }
         public async Task<Post> CreatePost(Post post, List<IFormFile> files)
         {
@@ -21,23 +24,30 @@ namespace social_oc_api.Repositories
 
             foreach (var file in files)
             {
-                var imageDomain = new Image
+                var imageDomain = new PostImage
                 {
                     File = file,
-                    ReferenceId = post.Id,
+                    PostId = post.Id,
                 };
 
-                var imageUploadedDomain = await _imageRepository.UploadImage(imageDomain);
-                if (post.Files == null)
-                {
-                    post.Files = new List<Image> { imageUploadedDomain };
-                }
-                else
-                {
-                    post.Files.Add(imageUploadedDomain);
-                }
+               var imageUploadedDomain = await _imageRepository.UploadImage(imageDomain, "PostImages");
             }
             return post;
+        }
+
+        public async Task<Post?> deletePost(Guid postId, Guid OwnUserId)
+        {
+            var postDomain = await _dbContext.Posts.Include(post => post.PostImages).FirstOrDefaultAsync(post => post.Id == postId && post.UserId == OwnUserId);
+            if (postDomain == null) { return null; }
+
+            foreach (var image in postDomain.PostImages)
+            {
+                _utils.DeleteImageFromFolder(image.FilePath);
+            }
+            _dbContext.Posts.Remove(postDomain);
+            await _dbContext.SaveChangesAsync();
+
+            return postDomain;
         }
 
         // Post of Home, of followers
@@ -48,16 +58,11 @@ namespace social_oc_api.Repositories
                .Select(f => f.FollowingId)
                .ToListAsync();
 
+            followersIds.Add(ownUserId);
+
             var postsWithImages = await _dbContext.Posts
                 .Where(post => followersIds.Contains(post.UserId))
-                .Select(post => new Post
-                {
-                    Id = post.Id,
-                    UserId = post.UserId,
-                    Files = _dbContext.Images
-                        .Where(image => image.ReferenceId == post.Id)
-                        .ToList()
-                })
+                .Include(post => post.PostImages)
                 .ToListAsync();
 
             return postsWithImages;
@@ -66,22 +71,11 @@ namespace social_oc_api.Repositories
         public async Task<List<Post>> GetPostsOf(Guid userId)
         {
             var postsWithImages = await _dbContext.Posts
-                .Where(post => post.UserId == userId)
-                .Select(post => new
-                {
-                    Post = post,
-                    Images = _dbContext.Images
-                        .Where(image => image.ReferenceId == post.Id)
-                        .ToList()
-                })
-                .ToListAsync();
+                 .Where(post => post.UserId == userId)
+                 .Include(post => post.PostImages)
+                 .ToListAsync();
 
-            var posts = postsWithImages.Select(pwi =>
-            {
-                pwi.Post.Files = pwi.Images;
-                return pwi.Post;
-            }).ToList();
-            return posts;   
+            return postsWithImages;
         }
     }
 }

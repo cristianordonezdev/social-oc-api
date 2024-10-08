@@ -27,23 +27,17 @@ namespace social_oc_api.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userId != null)
-            {
-                var follower = new Follower
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var follower = new Follower
                 {
                     FollowerId = new Guid(userId),
                     FollowingId = followingId,
                 };
 
-                var followerDomain = await _followerRepository.ToggleFollowAction(follower);
+            var followerDomain = await _followerRepository.ToggleFollowAction(follower);
 
-                return Ok(followerDomain);
-            }
-
-            ModelState.AddModelError("Follow", "Something wrong happened");
-            var errorResponse = _utils.BuildErrorResponse(ModelState);
-
-            return BadRequest(errorResponse);
+            return Ok(followerDomain);
         }
     }
 }

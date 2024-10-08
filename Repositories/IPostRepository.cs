@@ -11,5 +11,7 @@ namespace social_oc_api.Repositories
         Task<List<Post>> GetPostsHome(Guid ownUserId);
 
         Task<List<Post>> GetPostsOf(Guid userId);
+
+        Task<Post?> deletePost(Guid postId, Guid OwnUserId);
     }
 }
