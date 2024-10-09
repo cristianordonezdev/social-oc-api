@@ -1,5 +1,5 @@
-﻿using static System.Net.Mime.MediaTypeNames;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using social_oc_api.Models.Domain.Auth;
+using social_oc_api.Models.Domain.Images;
 
 namespace social_oc_api.Models.Domain
 {
