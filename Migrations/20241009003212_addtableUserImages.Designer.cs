@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using social_oc_api.Data;
 
@@ -11,9 +12,11 @@ using social_oc_api.Data;
 namespace social_oc_api.Migrations
 {
     [DbContext(typeof(SocialOCDBContext))]
-    partial class SocialOCDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241009003212_addtableUserImages")]
+    partial class addtableUserImages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -304,6 +307,9 @@ namespace social_oc_api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -312,6 +318,8 @@ namespace social_oc_api.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("PostId");
 
@@ -334,8 +342,7 @@ namespace social_oc_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserImages");
                 });
@@ -358,7 +365,12 @@ namespace social_oc_api.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Posts");
                 });
@@ -416,6 +428,10 @@ namespace social_oc_api.Migrations
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Images.PostImage", b =>
                 {
+                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", null)
+                        .WithMany("Image")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("social_oc_api.Models.Domain.Post", "Post")
                         .WithMany("PostImages")
                         .HasForeignKey("PostId")
@@ -428,18 +444,28 @@ namespace social_oc_api.Migrations
             modelBuilder.Entity("social_oc_api.Models.Domain.Images.UserImage", b =>
                 {
                     b.HasOne("social_oc_api.Models.Domain.ApplicationUser", "User")
-                        .WithOne("ImageProfile")
-                        .HasForeignKey("social_oc_api.Models.Domain.Images.UserImage", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>
+                {
+                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", "User")
+                        .WithMany("Posts")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("social_oc_api.Models.Domain.ApplicationUser", b =>
                 {
-                    b.Navigation("ImageProfile")
-                        .IsRequired();
+                    b.Navigation("Image");
+
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>

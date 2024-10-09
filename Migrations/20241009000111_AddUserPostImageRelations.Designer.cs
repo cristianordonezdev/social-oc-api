@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using social_oc_api.Data;
 
@@ -11,9 +12,11 @@ using social_oc_api.Data;
 namespace social_oc_api.Migrations
 {
     [DbContext(typeof(SocialOCDBContext))]
-    partial class SocialOCDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241009000111_AddUserPostImageRelations")]
+    partial class AddUserPostImageRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,7 +301,33 @@ namespace social_oc_api.Migrations
                     b.ToTable("Followers");
                 });
 
-            modelBuilder.Entity("social_oc_api.Models.Domain.Images.PostImage", b =>
+            modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Caption")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("social_oc_api.Models.Domain.PostImage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -316,51 +345,6 @@ namespace social_oc_api.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("PostImages");
-                });
-
-            modelBuilder.Entity("social_oc_api.Models.Domain.Images.UserImage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("UserImages");
-                });
-
-            modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -414,7 +398,18 @@ namespace social_oc_api.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("social_oc_api.Models.Domain.Images.PostImage", b =>
+            modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>
+                {
+                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", "User")
+                        .WithMany("Posts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("social_oc_api.Models.Domain.PostImage", b =>
                 {
                     b.HasOne("social_oc_api.Models.Domain.Post", "Post")
                         .WithMany("PostImages")
@@ -425,21 +420,9 @@ namespace social_oc_api.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("social_oc_api.Models.Domain.Images.UserImage", b =>
-                {
-                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", "User")
-                        .WithOne("ImageProfile")
-                        .HasForeignKey("social_oc_api.Models.Domain.Images.UserImage", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("social_oc_api.Models.Domain.ApplicationUser", b =>
                 {
-                    b.Navigation("ImageProfile")
-                        .IsRequired();
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>

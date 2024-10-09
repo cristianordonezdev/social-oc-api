@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using social_oc_api.Models.Domain;
+using social_oc_api.Models.Domain.Images;
 using social_oc_api.Models.DTO.Auth;
 using social_oc_api.Models.DTO.Posts;
 

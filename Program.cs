@@ -7,6 +7,7 @@ using social_oc_api.Data;
 using social_oc_api.Mappings;
 using social_oc_api.Models.Domain;
 using social_oc_api.Repositories;
+using social_oc_api.Repositories.User;
 using social_oc_api.Utils;
 using System.Text;
 
@@ -77,6 +78,8 @@ builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
 builder.Services.AddScoped<IPostRepository, SQLPostRepository>();
 builder.Services.AddScoped<IImageRepository, SQLImageRepository>();
 builder.Services.AddScoped<IFollowerRepository, SQLFollowerRepository>();
+builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
+
 builder.Services.AddScoped<IUtils, Utils>();
 
 //REGISTERING MAPPING ==========================================

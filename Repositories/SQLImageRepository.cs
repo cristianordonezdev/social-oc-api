@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using social_oc_api.Data;
 using social_oc_api.Utils;
-using social_oc_api.Models.Domain;
 using Microsoft.EntityFrameworkCore;
+using social_oc_api.Models.Domain.Images;
 namespace social_oc_api.Repositories
 {
     public class SQLImageRepository : IImageRepository
@@ -37,7 +37,7 @@ namespace social_oc_api.Repositories
             return imageDomain;
         }
 
-        public async Task<Image> UploadImage(PostImage image, string type)
+        public async Task<Image> UploadImage<T>(T image, string type) where T : Image 
         {
             string unique_name = GenerateUniqueFileName();
             string extensionImage = Path.GetExtension(image.File.FileName);
@@ -54,10 +54,12 @@ namespace social_oc_api.Repositories
             image.FilePath = urlFilePath;
             
             // Add Image to the images table
-            if (type == "PostImages")
+            if (type == "PostImages" && image is PostImage postImage)
             {
-                await _dbContext.PostImages.AddAsync(image);
-
+                await _dbContext.PostImages.AddAsync(postImage);
+            } else if (type == "UserImages" && image is UserImage userImage)
+            {
+                await _dbContext.UserImages.AddAsync(userImage);
             }
             await _dbContext.SaveChangesAsync();
 

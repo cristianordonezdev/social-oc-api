@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Auth;
+using social_oc_api.Models.Domain.Images;
 
 namespace social_oc_api.Data
 {
@@ -15,6 +16,7 @@ namespace social_oc_api.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostImage> PostImages { get; set; }
+        public DbSet<UserImage> UserImages { get; set; }
         public DbSet<Follower> Followers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
@@ -27,6 +29,12 @@ namespace social_oc_api.Data
             modelBuilder.Entity<ApplicationUser>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<ApplicationUser>()
+               .HasOne(u => u.ImageProfile)
+               .WithOne(ui => ui.User)
+               .HasForeignKey<UserImage>(ui => ui.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Post>()
                     .HasMany(p => p.PostImages)

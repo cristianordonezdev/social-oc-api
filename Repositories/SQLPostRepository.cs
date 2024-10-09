@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using social_oc_api.Data;
 using social_oc_api.Models.Domain;
+using social_oc_api.Models.Domain.Images;
 using social_oc_api.Utils;
-using System.Linq;
 
 namespace social_oc_api.Repositories
 {
