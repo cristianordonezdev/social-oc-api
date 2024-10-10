@@ -42,9 +42,9 @@ namespace social_oc_api.Utils
                 File.Delete(filePath);
             }
         }
-        public void ValidateFileUpload(List<IFormFile> files, ModelStateDictionary modelState)
+        public void ValidateFileUpload(List<IFormFile> files, ModelStateDictionary modelState, string[] allowedExtension = null)
         {
-            var allowedExtension = new string[] { ".jpg", ".jpeg", ".png", ".mp4" };
+            allowedExtension ??= new string[] { ".jpg", ".jpeg", ".png", ".mp4" };
 
             foreach (var file in files)
             {
