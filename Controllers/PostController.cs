@@ -26,7 +26,7 @@ namespace social_oc_api.Controllers
         [Authorize]
         public async Task<IActionResult> Post([FromForm] PostCreateDto postCreateDto)
         {
-            _utils.ValidateFileUpload(postCreateDto.File, ModelState);
+            _utils.ValidateFileUpload(postCreateDto.File, ModelState, null);
 
             if (ModelState.IsValid)
             {

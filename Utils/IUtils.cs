@@ -7,7 +7,7 @@ namespace social_oc_api.Utils
     {
         public ErrorResponse BuildErrorResponse(ModelStateDictionary modelState);
 
-        public void ValidateFileUpload(List<IFormFile> files, ModelStateDictionary modelState);
+        public void ValidateFileUpload(List<IFormFile> files, ModelStateDictionary modelState, string[]? allowedExtension);
 
         public void DeleteImageFromFolder(string imageName);
     }

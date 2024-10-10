@@ -11,7 +11,9 @@ namespace social_oc_api.Mappings
         public MainAutoMapper()
         {
             // origin - destination
-            CreateMap<ApplicationUser, UserDto>().ReverseMap();
+            CreateMap<ApplicationUser, UserDto>()
+                .ForMember(dest => dest.ImageProfile, opt => opt.MapFrom(src => src.ImageProfile.FilePath))
+                .ReverseMap();
 
             CreateMap<PostCreateDto, Post>().ReverseMap();
             CreateMap<Post, PostDto>().ReverseMap();

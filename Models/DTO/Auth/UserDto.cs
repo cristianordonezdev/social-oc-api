@@ -12,5 +12,7 @@
         public string PhoneNumber { get; set; }
         public bool PhoneNumberConfirmed { get; set; }
 
+        public string ImageProfile { get; set; }
+
     }
 }
