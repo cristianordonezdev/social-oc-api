@@ -6,7 +6,7 @@ namespace social_oc_api.Models.Domain
     public class Post
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
 
         public string? Caption { get; set; }
 
@@ -15,5 +15,7 @@ namespace social_oc_api.Models.Domain
         public DateTime? UpdatedAt { get; set; }
 
         public ICollection<PostImage> PostImages { get; set; }
+
+        public ApplicationUser User { get; set; }
     }
 }

@@ -23,7 +23,7 @@ namespace social_oc_api.Controllers
         [Route("{followingId}", Name = "handleActionFollow")]
         [Authorize]
 
-        public async Task<IActionResult> HandleActionFollow([FromRoute] Guid followingId)
+        public async Task<IActionResult> HandleActionFollow([FromRoute] string followingId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -31,7 +31,7 @@ namespace social_oc_api.Controllers
 
             var follower = new Follower
                 {
-                    FollowerId = new Guid(userId),
+                    FollowerId = userId,
                     FollowingId = followingId,
                 };
 

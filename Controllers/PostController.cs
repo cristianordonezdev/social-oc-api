@@ -34,7 +34,7 @@ namespace social_oc_api.Controllers
                 if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
 
                 var postDomain = _mapper.Map<Post>(postCreateDto);
-                postDomain.UserId = new Guid(userId);
+                postDomain.UserId = userId;
 
                 var postDomainSaved = await _postRepository.CreatePost(postDomain, postCreateDto.File);
                 return Ok(_mapper.Map<PostDto>(postDomainSaved));
@@ -51,7 +51,7 @@ namespace social_oc_api.Controllers
 
             if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
 
-            var postsDomain = await _postRepository.GetPostsHome(new Guid(userId));
+            var postsDomain = await _postRepository.GetPostsHome(userId);
             return Ok(_mapper.Map<List<PostDto>>(postsDomain));
            
         }

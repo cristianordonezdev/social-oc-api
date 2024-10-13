@@ -77,7 +77,7 @@ namespace social_oc_api.Repositories
             }
         }
 
-        public async Task<RefreshToken?> GetRefreshToken(Guid UserId, string Token)
+        public async Task<RefreshToken?> GetRefreshToken(string UserId, string Token)
         {
             var refreshToken = await _db_context.RefreshTokens.FirstOrDefaultAsync(t => t.UserId == UserId && Token == t.Token);
             return refreshToken;
@@ -86,12 +86,12 @@ namespace social_oc_api.Repositories
         public async Task SaveRefreshToken(string UserId, string Token)
         {
 
-            var userToken = await _db_context.RefreshTokens.FirstOrDefaultAsync((i) => i.UserId.Equals(new Guid(UserId)));
+            var userToken = await _db_context.RefreshTokens.FirstOrDefaultAsync((i) => i.UserId.Equals(UserId));
             if (userToken == null)
             {
                 var newRefreshToken = new RefreshToken
                 {
-                    UserId = new Guid(UserId),
+                    UserId = UserId,
                     Token = Token,
                     ExpiresAt = DateTime.Now.AddMinutes(10080),
                     IsRevoked = false

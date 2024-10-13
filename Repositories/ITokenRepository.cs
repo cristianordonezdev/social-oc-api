@@ -12,7 +12,7 @@ namespace social_oc_api.Repositories
 
         Task SaveRefreshToken(string UserId, string Token);
 
-        Task<RefreshToken?>  GetRefreshToken(Guid UserId, string Token);
+        Task<RefreshToken?>  GetRefreshToken(string UserId, string Token);
 
     }
 }

@@ -127,7 +127,7 @@ namespace social_oc_api.Controllers
             }
             var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var savedRefreshToken = await tokenRepository.GetRefreshToken(new Guid(userId), tokenRequest.Token);
+            var savedRefreshToken = await tokenRepository.GetRefreshToken(userId, tokenRequest.Token);
             if (savedRefreshToken == null)
             {
                 return NotFound();
