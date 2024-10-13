@@ -2,10 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Images;
 using social_oc_api.Models.DTO.Auth;
 using social_oc_api.Models.DTO.Posts;
+using social_oc_api.Models.DTO.User;
+using social_oc_api.Repositories;
 using social_oc_api.Repositories.User;
 using social_oc_api.Utils;
 using System.Security.Claims;
@@ -69,5 +72,36 @@ namespace social_oc_api.Controllers
             var errorResponse = _utils.BuildErrorResponse(ModelState);
             return BadRequest(errorResponse);
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("profile/{userId?}", Name = "profile")]
+        public async Task<IActionResult> getProfile([FromRoute] string? userId)
+        {
+            if (userId == null)
+            {
+                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var profileUser = await _userRepository.GetProfile(userId);
+            if (profileUser == null) { return NotFound(); }
+
+            var userProfileDto = new UserProfileDto
+            {
+                Name = profileUser.User.Name,
+                UserName = profileUser.User.UserName,
+                ImageProfile = profileUser.User.ImageProfile != null ? profileUser.User.ImageProfile.FilePath : null,
+                MetricsProfile = profileUser.MetricsProfile,
+                Posts = profileUser.User.Posts.Select(post => new PostProfileDto
+                {
+                    Id = post.Id,
+                    FilePath = post.PostImages.Select(image => image.FilePath).ToList()[0],                    
+                }).ToList()
+            };
+
+            return Ok(userProfileDto);
+        }
+
     }
 }

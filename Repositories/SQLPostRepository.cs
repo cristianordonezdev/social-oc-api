@@ -37,7 +37,7 @@ namespace social_oc_api.Repositories
 
         public async Task<Post?> deletePost(Guid postId, Guid OwnUserId)
         {
-            var postDomain = await _dbContext.Posts.Include(post => post.PostImages).FirstOrDefaultAsync(post => post.Id == postId && post.UserId == OwnUserId);
+            var postDomain = await _dbContext.Posts.Include(post => post.PostImages).FirstOrDefaultAsync(post => post.Id == postId && post.UserId == OwnUserId.ToString());
             if (postDomain == null) { return null; }
 
             foreach (var image in postDomain.PostImages)
@@ -51,11 +51,11 @@ namespace social_oc_api.Repositories
         }
 
         // Post of Home, of followers
-        public async Task<List<Post>> GetPostsHome(Guid ownUserId)
+        public async Task<List<Post>> GetPostsHome(string ownUserId)
         {
             var followersIds = await _dbContext.Followers
-               .Where(f => f.FollowerId == ownUserId)
-               .Select(f => f.FollowingId)
+               .Where(f => f.FollowerId.ToString() == ownUserId)
+               .Select(f => f.FollowingId.ToString())
                .ToListAsync();
 
             followersIds.Add(ownUserId);
@@ -71,7 +71,7 @@ namespace social_oc_api.Repositories
         public async Task<List<Post>> GetPostsOf(Guid userId)
         {
             var postsWithImages = await _dbContext.Posts
-                 .Where(post => post.UserId == userId)
+                 .Where(post => post.UserId == userId.ToString())
                  .Include(post => post.PostImages)
                  .ToListAsync();
 

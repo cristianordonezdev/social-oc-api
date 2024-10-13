@@ -31,6 +31,12 @@ namespace social_oc_api.Data
                 .IsUnique();
 
             modelBuilder.Entity<ApplicationUser>()
+              .HasMany(u => u.Posts)
+              .WithOne(ui => ui.User)
+              .HasForeignKey(u => u.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ApplicationUser>()
                .HasOne(u => u.ImageProfile)
                .WithOne(ui => ui.User)
                .HasForeignKey<UserImage>(ui => ui.UserId)

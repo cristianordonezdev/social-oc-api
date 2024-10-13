@@ -8,5 +8,8 @@ namespace social_oc_api.Repositories.User
         Task<bool> DeleteUser(Guid userId);
 
         Task<ApplicationUser> UploadImageProfile(UserImage userImage);
+
+        Task<ProfileUser?> GetProfile(string userId);
+
     }
 }

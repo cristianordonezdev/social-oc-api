@@ -12,6 +12,7 @@ namespace social_oc_api.Models.Domain
         public DateTime? UpdatedAt { get; set; }
 
         public virtual UserImage ImageProfile { get; set; }
+        public ICollection<Post> Posts { get; set; }
 
     }
 }

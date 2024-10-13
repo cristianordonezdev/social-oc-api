@@ -4,9 +4,9 @@
     {
         public Guid Id { get; set; }
 
-        public Guid FollowerId { get; set; }
+        public string FollowerId { get; set; }
 
-        public Guid FollowingId { get; set; }
+        public string FollowingId { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

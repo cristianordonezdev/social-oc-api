@@ -33,6 +33,38 @@ namespace social_oc_api.Repositories.User
             return true;
         }
 
+        public async Task<ProfileUser?> GetProfile(string userId)
+        {
+            var userDomain = await _dbContext.Users
+                .Include(u => u.Posts)
+                    .ThenInclude(i => i.PostImages)
+                .Include(u => u.ImageProfile)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (userDomain == null)
+            {
+                return null;
+            }
+
+            var followers = await _dbContext.Followers.CountAsync(i => i.FollowerId == userId);
+            var following = await _dbContext.Followers.CountAsync(i => i.FollowingId == userId);
+            var postCount = userDomain.Posts.Count;
+
+            var profile = new ProfileUser
+            {
+                User = userDomain,
+                MetricsProfile = new MetricsProfile
+                {
+                    PostCount = postCount,
+                    Followers = followers,
+                    Following = following
+                }
+            };
+
+            return profile;
+        }
+
+
         public async Task<ApplicationUser> UploadImageProfile(UserImage userImage)
         {
 
@@ -47,7 +79,7 @@ namespace social_oc_api.Repositories.User
                 await _dbContext.SaveChangesAsync();
                 var imageDomain = await _imageRepository.UploadImage(userImage, "UserImages");
             }
-            var userDomain = await _dbContext.Users.Include(i => i.ImageProfile).FirstOrDefaultAsync(u => u.Id == userImage.UserId);
+            var userDomain = await _dbContext.Users.Include(i => i.ImageProfile).FirstOrDefaultAsync(u => u.Id.Equals(userImage.UserId));
 
             return userDomain;
         }
