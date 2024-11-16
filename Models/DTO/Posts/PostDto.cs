@@ -6,7 +6,7 @@ namespace social_oc_api.Models.DTO.Posts
     public class PostDto
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public ApplicationUser User { get; set; }
 
         public string Caption { get; set; }
 

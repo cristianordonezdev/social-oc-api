@@ -33,18 +33,22 @@ namespace social_oc_api.Repositories.User
             return true;
         }
 
-        public async Task<ProfileUser?> GetProfile(string userId)
+        public async Task<ProfileUser?> GetProfile(string username)
         {
             var userDomain = await _dbContext.Users
                 .Include(u => u.Posts)
                     .ThenInclude(i => i.PostImages)
                 .Include(u => u.ImageProfile)
-                .FirstOrDefaultAsync(u => u.Id == userId);
+                .FirstOrDefaultAsync(u => u.UserName == username);
+
+                
 
             if (userDomain == null)
             {
                 return null;
             }
+
+            string userId = userDomain.Id;
 
             var followers = await _dbContext.Followers.CountAsync(i => i.FollowerId == userId);
             var following = await _dbContext.Followers.CountAsync(i => i.FollowingId == userId);

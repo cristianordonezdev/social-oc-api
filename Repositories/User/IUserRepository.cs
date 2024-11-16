@@ -9,7 +9,7 @@ namespace social_oc_api.Repositories.User
 
         Task<ApplicationUser> UploadImageProfile(UserImage userImage);
 
-        Task<ProfileUser?> GetProfile(string userId);
+        Task<ProfileUser?> GetProfile(string username);
 
     }
 }

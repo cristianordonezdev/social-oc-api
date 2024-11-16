@@ -18,10 +18,12 @@ namespace social_oc_api.Mappings
 
             CreateMap<PostCreateDto, Post>().ReverseMap();
             CreateMap<Post, PostDto>().ReverseMap();
-
+            CreateMap<Like, LikePostDto>().ReverseMap();
+ 
             // Mapeo del Post a PostDto
             CreateMap<Post, PostDto>()
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.PostImages));
+               
 
             // Mapeo del File a FileDto (solo Id y FilePath)
             CreateMap<Image, ImageDto>()

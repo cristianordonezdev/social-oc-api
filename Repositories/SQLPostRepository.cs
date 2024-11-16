@@ -2,7 +2,11 @@
 using social_oc_api.Data;
 using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Images;
+using social_oc_api.Models.DTO.Posts;
+
+using social_oc_api.Models.DTO.User;
 using social_oc_api.Utils;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace social_oc_api.Repositories
 {
@@ -68,14 +72,120 @@ namespace social_oc_api.Repositories
             return postsWithImages;
         }
 
-        public async Task<List<Post>> GetPostsOf(Guid userId)
+        public async Task<List<Models.DTO.Posts.PostProfileDto>> GetPostsOf(Guid userId, int page, int pageSize)
         {
-            var postsWithImages = await _dbContext.Posts
-                 .Where(post => post.UserId == userId.ToString())
-                 .Include(post => post.PostImages)
-                 .ToListAsync();
 
-            return postsWithImages;
+            int skip = (page - 1) * pageSize;
+
+            var postProfiles = await _dbContext.Posts
+                .Where(post => post.UserId == userId.ToString())
+                .OrderByDescending(post => post.CreatedAt)
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(post => new Models.DTO.Posts.PostProfileDto
+                {
+                    Id = post.Id,
+                    Image = post.PostImages.FirstOrDefault().FilePath ?? "",
+                    LikesCount = _dbContext.Likes.Count(like => like.PostId == post.Id),
+                    CommentsCount = _dbContext.Comments.Count(comment => comment.PostId == post.Id)
+                })
+                .ToListAsync();
+
+            return postProfiles;
         }
+        public async Task<PostDetailDto?> GetPostDetail(Guid postId)
+        {
+            var postDomain = await _dbContext.Posts
+            .Where(i => i.Id == postId)
+            .Select(post => new PostDetailDto
+                {
+                    Id = post.Id,
+                    Caption = post.Caption,
+                    CreatedAt = post.CreatedAt,
+                    UpdatedAt = post.UpdatedAt,
+                    PostImages = post.PostImages.Select(img => new ImageDto
+                    {
+                        Id = img.Id,
+                        FilePath = img.FilePath
+                    }).ToList(),
+                    User = new UserDetailDto
+                    {
+                        UserName = post.User.UserName,
+                        ImageProfile = new ImageDto
+                        {
+                            Id = post.User.ImageProfile.Id,
+                            FilePath = post.User.ImageProfile.FilePath
+                        }
+                    },
+                    Likes = null,
+                    Comments = null
+                })
+                .FirstOrDefaultAsync();
+            return postDomain;
+        }
+
+        public async Task<Like?> LikePost(string userId, Guid postId)
+        {
+            var likeDomainSaved = await _dbContext.Likes
+                .FirstOrDefaultAsync(i => i.PostId == postId && i.UserId == userId);
+
+            if (likeDomainSaved == null)
+            {
+                var postExists = await _dbContext.Posts.AnyAsync(i => i.Id == postId);
+                if (!postExists) return null;
+
+                var likeDomain = new Like
+                {
+                    UserId = userId,
+                    PostId = postId,
+                };
+
+                await _dbContext.Likes.AddAsync(likeDomain);
+                await _dbContext.SaveChangesAsync();
+                return likeDomain;
+            }
+
+            _dbContext.Likes.Remove(likeDomainSaved);
+            await _dbContext.SaveChangesAsync();
+
+            return likeDomainSaved;
+        }
+
+        public async Task<CommentFullDto?> CommentPost(string userId, Guid postId, string comment)
+        {
+            var postExists = await _dbContext.Posts.AnyAsync(i => i.Id == postId);
+            if (!postExists) return null;
+
+            Comment commentDomain = new Comment
+            {
+                UserId = userId,
+                PostId = postId,
+                CommentText = comment
+            };
+
+            await _dbContext.Comments.AddAsync(commentDomain);
+            await _dbContext.SaveChangesAsync();
+
+            await _dbContext.Entry(commentDomain)
+                   .Reference(c => c.User)
+                   .LoadAsync();
+            await _dbContext.Entry(commentDomain.User)
+                       .Reference(u => u.ImageProfile)
+                       .LoadAsync();
+
+            var commentDto = new CommentFullDto
+            {
+                Id = commentDomain.Id,
+                CommentText = commentDomain.CommentText,
+                CreatedAt = commentDomain.CreatedAt,
+                username = commentDomain.User.UserName,
+                imageProfile = commentDomain.User.ImageProfile?.FilePath,
+            };
+
+
+            return commentDto;
+        }
+
+
     }
 }

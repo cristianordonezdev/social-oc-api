@@ -6,6 +6,7 @@ using social_oc_api.Models.Domain;
 using System.Security.Claims;
 using social_oc_api.Repositories;
 using social_oc_api.Utils;
+using social_oc_api.Repositories.User;
 namespace social_oc_api.Controllers
 {
     [Route("api/[controller]")]
@@ -14,12 +15,69 @@ namespace social_oc_api.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IPostRepository _postRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUtils _utils;
-        public PostController(IMapper mapper, IPostRepository postRepository, IUtils utils)
+        public PostController(IMapper mapper, IPostRepository postRepository, IUtils utils, IUserRepository userRepository)
         {
             _mapper = mapper;
             _postRepository = postRepository;
             _utils = utils;
+            _userRepository = userRepository;
+        }
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> getPostsHome()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var postsDomain = await _postRepository.GetPostsHome(userId);
+            return Ok(_mapper.Map<List<PostDto>>(postsDomain));
+           
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Of/{username}", Name = "GetPostsOf")]
+        public async Task<IActionResult> getPostsOf([FromRoute] string username, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            if (string.IsNullOrEmpty(username)) { return NotFound(); }
+
+            var profileUser = await _userRepository.GetProfile(username);
+            if (profileUser == null) { return NotFound(); }
+
+            var postsDomain = await _postRepository.GetPostsOf(new Guid(profileUser.User.Id), page, pageSize);
+            return Ok(postsDomain);
+        }
+
+
+
+        [HttpGet]
+        [Authorize]
+        [Route("{postId}", Name = "getPostDetail")]
+        public async Task<IActionResult> postDetail([FromRoute] string postId)
+        {
+            var post = await _postRepository.GetPostDetail(new Guid(postId));
+            if (post == null) { return NotFound(); }
+
+            return Ok(post); ;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("like/{postId}", Name = "likePost")]
+        public async Task<IActionResult> likePost([FromRoute] string postId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var like = await _postRepository.LikePost(userId, new Guid(postId));
+            if (like == null) { return NotFound(); }
+
+            return Ok(_mapper.Map<LikePostDto>(like));
         }
 
         [HttpPost]
@@ -43,32 +101,17 @@ namespace social_oc_api.Controllers
             return BadRequest(errorResponse);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Authorize]
-        public async Task<IActionResult> getPostsHome()
+        [Route("comment/{postId?}")]
+        public async Task<IActionResult> PostComment([FromBody] CommentDto commentDto, [FromRoute] Guid postId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
 
-            var postsDomain = await _postRepository.GetPostsHome(userId);
-            return Ok(_mapper.Map<List<PostDto>>(postsDomain));
-           
-        }
-
-        [HttpGet]
-        [Authorize]
-        [Route("Of/{userId?}", Name = "GetPostsOf")]
-        public async Task<IActionResult> getPostsOf([FromRoute] string? userId)
-        {
-            if (string.IsNullOrEmpty(userId))
-            {
-                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
-
-            var postsDomain = await _postRepository.GetPostsOf(new Guid(userId));
-            return Ok(_mapper.Map<List<PostDto>>(postsDomain));
+            var commentDtoFull = await _postRepository.CommentPost(userId, postId, commentDto.CommentText);
+            
+            return Ok(commentDtoFull);
         }
 
         [HttpDelete]

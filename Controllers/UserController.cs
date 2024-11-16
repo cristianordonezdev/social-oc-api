@@ -75,31 +75,23 @@ namespace social_oc_api.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("profile/{userId?}", Name = "profile")]
-        public async Task<IActionResult> getProfile([FromRoute] string? userId)
+        [Route("profile/{username?}", Name = "profile")]
+        public async Task<IActionResult> getProfile([FromRoute] string username)
         {
-            if (userId == null)
-            {
-                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+            if (string.IsNullOrEmpty(username)) { return NotFound(); }
 
-            var profileUser = await _userRepository.GetProfile(userId);
+            var profileUser = await _userRepository.GetProfile(username);
             if (profileUser == null) { return NotFound(); }
 
             var userProfileDto = new UserProfileDto
             {
                 Name = profileUser.User.Name,
                 UserName = profileUser.User.UserName,
+                Description = profileUser.User.Description,
                 ImageProfile = profileUser.User.ImageProfile != null ? profileUser.User.ImageProfile.FilePath : null,
                 MetricsProfile = profileUser.MetricsProfile,
-                Posts = profileUser.User.Posts.Select(post => new PostProfileDto
-                {
-                    Id = post.Id,
-                    FilePath = post.PostImages.Select(image => image.FilePath).ToList()[0],                    
-                }).ToList()
+    
             };
-
             return Ok(userProfileDto);
         }
 
