@@ -5,6 +5,8 @@ using social_oc_api.Models.Domain.Images;
 using social_oc_api.Models.DTO.Posts;
 using social_oc_api.Models.DTO.User;
 using social_oc_api.Utils;
+using System.Reflection.Metadata;
+using System.Xml.Linq;
 
 namespace social_oc_api.Repositories
 {
@@ -41,6 +43,13 @@ namespace social_oc_api.Repositories
         {
             var postDomain = await _dbContext.Posts.Include(post => post.PostImages).FirstOrDefaultAsync(post => post.Id == postId && post.UserId == OwnUserId.ToString());
             if (postDomain == null) { return null; }
+
+            var comments = _dbContext.Comments.Where(c => c.PostId == postId);
+            _dbContext.Comments.RemoveRange(comments);
+
+            var likes = _dbContext.Likes.Where(l => l.PostId == postId);
+            _dbContext.Likes.RemoveRange(likes);
+
 
             foreach (var image in postDomain.PostImages)
             {
@@ -117,35 +126,6 @@ namespace social_oc_api.Repositories
                 .ToListAsync();
 
             return postProfiles;
-        }
-        public async Task<PostDetailDto?> GetPostDetail(Guid postId)
-        {
-            var postDomain = await _dbContext.Posts
-            .Where(i => i.Id == postId)
-            .Select(post => new PostDetailDto
-                {
-                    Id = post.Id,
-                    Caption = post.Caption,
-                    CreatedAt = post.CreatedAt,
-                    UpdatedAt = post.UpdatedAt,
-                    PostImages = post.PostImages.Select(img => new ImageDto
-                    {
-                        Id = img.Id,
-                        FilePath = img.FilePath
-                    }).ToList(),
-                    User = new UserDetailDto
-                    {
-                        UserName = post.User.UserName,
-                        ImageProfile = post.User.ImageProfile.FilePath,
-
-                    },
-                    FirstLikeUsername = post.Likes.OrderBy(like => like.CreatedAt)
-                                   .Select(like => like.User.UserName)
-                                   .FirstOrDefault(),
-                    HasMoreLikes = post.Likes.Count > 1
-            })
-                .FirstOrDefaultAsync();
-            return postDomain;
         }
 
         public async Task<Like?> LikePost(string userId, Guid postId)
@@ -266,6 +246,68 @@ namespace social_oc_api.Repositories
             }
 
             return null;
+        }
+        public async Task<PostDetailDto?> GetPostDetail(Guid postId)
+        {
+            var postDomain = await _dbContext.Posts
+            .Where(i => i.Id == postId)
+            .Select(post => new PostDetailDto
+            {
+                Id = post.Id,
+                Caption = post.Caption,
+                CreatedAt = post.CreatedAt,
+                UpdatedAt = post.UpdatedAt,
+                PostImages = post.PostImages.Select(img => new ImageDto
+                {
+                    Id = img.Id,
+                    FilePath = img.FilePath
+                }).ToList(),
+                User = new UserDetailDto
+                {
+                    UserName = post.User.UserName,
+                    ImageProfile = post.User.ImageProfile.FilePath,
+
+                },
+                FirstLikeUsername = post.Likes.OrderBy(like => like.CreatedAt)
+                                   .Select(like => like.User.UserName)
+                                   .FirstOrDefault(),
+                HasMoreLikes = post.Likes.Count > 1
+            })
+                .FirstOrDefaultAsync();
+            return postDomain;
+        }
+        public async Task<PostDetailDto?> UpdatePost(string captionUpdated, Guid postId, string ownUserId)
+        {
+            var postDomain = await _dbContext.Posts.FirstOrDefaultAsync(i => (i.Id == postId) && (i.UserId == ownUserId));
+            if (postDomain == null) { return null; }
+
+            postDomain.Caption = captionUpdated;
+            postDomain.UpdatedAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
+
+            var postDomainUpdated = await GetPostDetail(postDomain.Id);
+            return postDomainUpdated;
+        }
+        public async Task<Boolean?> deleteImagePost(Guid imageId, string OwnUserId)
+        {
+            var imageDomain = await _dbContext.PostImages.Include(i => i.Post).ThenInclude(post => post.PostImages).FirstOrDefaultAsync(i => i.Id == imageId && i.Post.UserId == OwnUserId);
+            if (imageDomain == null) { return null; }
+
+            if (imageDomain.Post.PostImages.Count == 1)
+            {
+                return false;
+            } else
+            {
+                foreach (var image in imageDomain.Post.PostImages)
+                {
+                    _utils.DeleteImageFromFolder(image.FilePath);
+                }
+                _dbContext.Remove(imageDomain);
+                await _dbContext.SaveChangesAsync();
+          
+                return true;
+            }
+
         }
     }
 }

@@ -10,6 +10,9 @@ namespace social_oc_api.Repositories
     public interface IPostRepository
     {
         Task<Post> CreatePost(Post post, List<IFormFile> files);
+
+        Task<PostDetailDto?> UpdatePost(string captionUpdated, Guid postId, string ownUserId);
+
         Task<List<PostHomeDto>> GetPostsHome(string ownUserId, int page, int pageSize);
 
         Task<List<UserListDto>?> LikesUsers(Guid? PostId, string OwnUserId, int page, int pageSize);
@@ -27,5 +30,8 @@ namespace social_oc_api.Repositories
         Task<Boolean?> deleteComment(Guid commentId, string OwnUserId);
 
         Task<Post?> deletePost(Guid postId, Guid OwnUserId);
+
+        Task<Boolean?> deleteImagePost(Guid imageId, string OwnUserId);
+
     }
 }

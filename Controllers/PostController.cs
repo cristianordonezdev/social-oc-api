@@ -7,6 +7,7 @@ using System.Security.Claims;
 using social_oc_api.Repositories;
 using social_oc_api.Utils;
 using social_oc_api.Repositories.User;
+using social_oc_api.Models.DTO.Auth;
 namespace social_oc_api.Controllers
 {
     [Route("api/[controller]")]
@@ -139,6 +140,25 @@ namespace social_oc_api.Controllers
             return Ok(commentDtoFull);
         }
 
+
+        [HttpPut]
+        [Authorize]
+        [Route("{postId?}")]
+
+        public async Task<IActionResult> UpdatePost([FromForm] UpdatePostDto updatePostDto, [FromRoute] Guid postId)
+        {
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var postDomainSaved = await _postRepository.UpdatePost(updatePostDto.Caption, postId, userId);
+            if (postDomainSaved != null)
+            {
+                return Ok(postDomainSaved);
+            } else { return NotFound();  }
+ 
+        }
+
         [HttpDelete]
         [Authorize]
         [Route("{postId?}")]
@@ -163,6 +183,23 @@ namespace social_oc_api.Controllers
 
             var isDeleted = await _postRepository.deleteComment(commentId, userId);
             if (isDeleted == null) { return NotFound(); }
+            return NoContent();
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("image/{imageId?}")]
+        public async Task<IActionResult> deleteImagePost([FromRoute] Guid imageId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var isDeleted = await _postRepository.deleteImagePost(imageId, userId);
+            if (isDeleted == null) { return NotFound(); }
+            else if (isDeleted == false) {
+                ModelState.AddModelError("delete_image", "Cannot remove all images");
+                return BadRequest(_utils.BuildErrorResponse(ModelState));
+            }
             return NoContent();
         }
     }
