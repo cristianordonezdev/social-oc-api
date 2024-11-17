@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using social_oc_api.Data;
 
@@ -11,9 +12,11 @@ using social_oc_api.Data;
 namespace social_oc_api.Migrations
 {
     [DbContext(typeof(SocialOCDBContext))]
-    partial class SocialOCDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241117005411_FollowerRelationUser")]
+    partial class FollowerRelationUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -318,27 +321,23 @@ namespace social_oc_api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FollowerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FollowingId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("FollowerId");
-
-                    b.HasIndex("FollowingId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Followers");
                 });
@@ -508,25 +507,11 @@ namespace social_oc_api.Migrations
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Follower", b =>
                 {
-                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", null)
-                        .WithMany("Following")
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", "FollowerUser")
-                        .WithMany("Followers")
-                        .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", "FollowingUser")
+                    b.HasOne("social_oc_api.Models.Domain.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("FollowingId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
-                    b.Navigation("FollowerUser");
-
-                    b.Navigation("FollowingUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Images.PostImage", b =>
@@ -583,10 +568,6 @@ namespace social_oc_api.Migrations
 
             modelBuilder.Entity("social_oc_api.Models.Domain.ApplicationUser", b =>
                 {
-                    b.Navigation("Followers");
-
-                    b.Navigation("Following");
-
                     b.Navigation("ImageProfile")
                         .IsRequired();
 

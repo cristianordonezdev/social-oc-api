@@ -225,6 +225,7 @@ namespace social_oc_api.Repositories
                 AreYouFollowing = _dbContext.Followers
                     .Any(f => f.FollowerId == OwnUserId && f.FollowingId == like.User.Id),
             })
+            .OrderByDescending(like => like.AreYouFollowing)
             .Skip(skip)
             .Take(pageSize)
             .ToListAsync();

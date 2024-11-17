@@ -10,5 +10,9 @@
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public ApplicationUser FollowerUser { get; set; }
+
+        public ApplicationUser FollowingUser { get; set; }
+
     }
 }

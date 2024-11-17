@@ -12,5 +12,7 @@ namespace social_oc_api.Repositories.User
 
         Task<ProfileUser?> GetProfile(string username);
 
+        Task<List<UserListDto>?> GetFollowerOrFollowing(string userId, string followAction, string OwnUserId, int page, int pageSize);
+
     }
 }
