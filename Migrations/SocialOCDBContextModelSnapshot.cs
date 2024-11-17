@@ -280,7 +280,7 @@ namespace social_oc_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Comment", b =>
@@ -309,7 +309,7 @@ namespace social_oc_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Follower", b =>
@@ -340,7 +340,7 @@ namespace social_oc_api.Migrations
 
                     b.HasIndex("FollowingId");
 
-                    b.ToTable("Followers");
+                    b.ToTable("Followers", (string)null);
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Images.PostImage", b =>
@@ -360,7 +360,7 @@ namespace social_oc_api.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("PostImages");
+                    b.ToTable("PostImages", (string)null);
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Images.UserImage", b =>
@@ -382,7 +382,7 @@ namespace social_oc_api.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserImages");
+                    b.ToTable("UserImages", (string)null);
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Like", b =>
@@ -407,7 +407,7 @@ namespace social_oc_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Likes");
+                    b.ToTable("Likes", (string)null);
                 });
 
             modelBuilder.Entity("social_oc_api.Models.Domain.Post", b =>
@@ -433,7 +433,7 @@ namespace social_oc_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
