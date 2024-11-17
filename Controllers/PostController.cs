@@ -53,6 +53,17 @@ namespace social_oc_api.Controllers
             return Ok(postsDomain);
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("comments/{postId}", Name = "getComment")]
+        public async Task<IActionResult> getComments([FromRoute] string postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            if (string.IsNullOrEmpty(postId)) { return NotFound(); }
+
+            var commentsDto = await _postRepository.GetCommentsPosts(new Guid(postId), page, pageSize);
+            return Ok(commentsDto);
+        }
+
 
 
         [HttpGet]
@@ -140,6 +151,19 @@ namespace social_oc_api.Controllers
             var postDomain = await _postRepository.deletePost(postId, new Guid(userId));
             if (postDomain == null) { return NotFound(); }
             return Ok(_mapper.Map<PostDto>(postDomain));
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("comment/{commentId?}")]
+        public async Task<IActionResult> deleteComment([FromRoute] Guid commentId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var isDeleted = await _postRepository.deleteComment(commentId, userId);
+            if (isDeleted == null) { return NotFound(); }
+            return NoContent();
         }
     }
 }
