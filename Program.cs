@@ -86,7 +86,46 @@ builder.Services.AddScoped<IUtils, Utils>();
 builder.Services.AddAutoMapper(typeof(MainAutoMapper));
 // ================================================================
 
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "social-oc-api",
+        Version = "v1"
+    });
+
+    // Definir esquema de seguridad
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Introduce el token JWT en el formato: Bearer {token}"
+    });
+
+    // Requerir el esquema de seguridad por defecto
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+
 var app = builder.Build();
+
+
 
 // Configurar middlewares en el pipeline
 if (app.Environment.IsDevelopment())

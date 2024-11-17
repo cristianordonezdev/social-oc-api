@@ -2,6 +2,7 @@
 using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Auth;
 using social_oc_api.Models.DTO.Posts;
+using social_oc_api.Models.DTO.User;
 using System.Security.Claims;
 
 namespace social_oc_api.Repositories
@@ -9,7 +10,9 @@ namespace social_oc_api.Repositories
     public interface IPostRepository
     {
         Task<Post> CreatePost(Post post, List<IFormFile> files);
-        Task<List<Post>> GetPostsHome(string ownUserId);
+        Task<List<PostHomeDto>> GetPostsHome(string ownUserId, int page, int pageSize);
+
+        Task<List<UserListDto>?> LikesUsers(Guid? PostId, string OwnUserId, int page, int pageSize);
 
         Task<List<PostProfileDto>> GetPostsOf(Guid userId, int page, int pageSize);
 

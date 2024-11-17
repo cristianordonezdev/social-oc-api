@@ -1,5 +1,6 @@
 ﻿using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Images;
+using social_oc_api.Models.DTO.User;
 
 namespace social_oc_api.Repositories.User
 {

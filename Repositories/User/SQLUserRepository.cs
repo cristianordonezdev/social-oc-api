@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using social_oc_api.Data;
 using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Images;
+using social_oc_api.Models.DTO.User;
 using social_oc_api.Utils;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -50,8 +51,8 @@ namespace social_oc_api.Repositories.User
 
             string userId = userDomain.Id;
 
-            var followers = await _dbContext.Followers.CountAsync(i => i.FollowerId == userId);
-            var following = await _dbContext.Followers.CountAsync(i => i.FollowingId == userId);
+            var following = await _dbContext.Followers.CountAsync(i => i.FollowerId == userId);
+            var followers = await _dbContext.Followers.CountAsync(i => i.FollowingId == userId);
             var postCount = userDomain.Posts.Count;
 
             var profile = new ProfileUser

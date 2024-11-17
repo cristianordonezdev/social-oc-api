@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Folder Include="Images\" />
+    <Folder Include="Models\DTO\User\bli\" />
   </ItemGroup>
 
 </Project>

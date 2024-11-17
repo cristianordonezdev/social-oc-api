@@ -28,14 +28,14 @@ namespace social_oc_api.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> getPostsHome()
+        public async Task<IActionResult> getPostsHome([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
 
-            var postsDomain = await _postRepository.GetPostsHome(userId);
-            return Ok(_mapper.Map<List<PostDto>>(postsDomain));
+            var postsDomain = await _postRepository.GetPostsHome(userId, page, pageSize);
+            return Ok(postsDomain);
            
         }
 
@@ -78,6 +78,20 @@ namespace social_oc_api.Controllers
             if (like == null) { return NotFound(); }
 
             return Ok(_mapper.Map<LikePostDto>(like));
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("likes/{postId}", Name = "likes Posts")]
+        public async Task<IActionResult> getLikes([FromRoute] string postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var likes = await _postRepository.LikesUsers(new Guid(postId), userId, page, pageSize);
+            if (likes == null) { return NotFound(); }
+
+            return Ok(likes);
         }
 
         [HttpPost]
