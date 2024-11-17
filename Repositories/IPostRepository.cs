@@ -22,6 +22,10 @@ namespace social_oc_api.Repositories
 
         Task<CommentFullDto?> CommentPost(string userId, Guid postId, string comment);
 
+        Task<List<CommentFullDto>?> GetCommentsPosts(Guid postId, int page, int pageSize);
+
+        Task<Boolean?> deleteComment(Guid commentId, string OwnUserId);
+
         Task<Post?> deletePost(Guid postId, Guid OwnUserId);
     }
 }

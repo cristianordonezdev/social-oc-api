@@ -136,15 +136,14 @@ namespace social_oc_api.Repositories
                     User = new UserDetailDto
                     {
                         UserName = post.User.UserName,
-                        ImageProfile = new ImageDto
-                        {
-                            Id = post.User.ImageProfile.Id,
-                            FilePath = post.User.ImageProfile.FilePath
-                        }
+                        ImageProfile = post.User.ImageProfile.FilePath,
+
                     },
-                    Likes = null,
-                    Comments = null
-                })
+                    FirstLikeUsername = post.Likes.OrderBy(like => like.CreatedAt)
+                                   .Select(like => like.User.UserName)
+                                   .FirstOrDefault(),
+                    HasMoreLikes = post.Likes.Count > 1
+            })
                 .FirstOrDefaultAsync();
             return postDomain;
         }
@@ -230,5 +229,43 @@ namespace social_oc_api.Repositories
             .Take(pageSize)
             .ToListAsync();
             }
+
+        public async Task<List<CommentFullDto>?> GetCommentsPosts(Guid postId, int page, int pageSize)
+        {
+            int skip = (page - 1) * pageSize;
+            var commentsDomain = await _dbContext.Comments.Where(i => i.PostId == postId)
+                .Include(post => post.User)
+                .OrderByDescending(comment => comment.CreatedAt)
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(post => new CommentFullDto
+                {
+                    Id = post.Id,
+                    CommentText = post.CommentText,
+                    CreatedAt = post.CreatedAt,
+                    username = post.User.UserName,
+                    imageProfile = post.User.ImageProfile.FilePath,
+                })
+                .ToListAsync();
+
+            return commentsDomain;
+        }
+
+        public async Task<Boolean?> deleteComment(Guid commentId, string OwnUserId)
+        {
+            var commentDomain = await _dbContext.Comments
+                .Include(comment => comment.Post)
+                    .ThenInclude(post => post.User)
+                .FirstOrDefaultAsync(i => i.Id == commentId);
+
+            if ((commentDomain?.Post.User.Id == OwnUserId) || commentDomain?.UserId == OwnUserId)
+            {
+                _dbContext.Comments.Remove(commentDomain);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+
+            return null;
+        }
     }
 }

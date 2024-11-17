@@ -5,7 +5,6 @@ using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Images;
 using social_oc_api.Models.DTO.User;
 using social_oc_api.Utils;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace social_oc_api.Repositories.User
 {

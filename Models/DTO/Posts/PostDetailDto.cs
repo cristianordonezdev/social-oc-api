@@ -8,14 +8,14 @@
         public DateTime? UpdatedAt { get; set; }
         public List<ImageDto> PostImages { get; set; }
         public UserDetailDto User { get; set; }
-        public object? Likes { get; set; }
-        public object? Comments { get; set; }
+        public string FirstLikeUsername { get; set; }
+        public Boolean HasMoreLikes { get; set; }
 
     }
 
     public class UserDetailDto
     {
         public string UserName { get; set; }
-        public ImageDto ImageProfile { get; set; }
+        public string ImageProfile { get; set; }
     }
 }
