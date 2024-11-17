@@ -3,10 +3,8 @@ using social_oc_api.Data;
 using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Images;
 using social_oc_api.Models.DTO.Posts;
-
 using social_oc_api.Models.DTO.User;
 using social_oc_api.Utils;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace social_oc_api.Repositories
 {
@@ -55,18 +53,45 @@ namespace social_oc_api.Repositories
         }
 
         // Post of Home, of followers
-        public async Task<List<Post>> GetPostsHome(string ownUserId)
+        public async Task<List<Models.DTO.Posts.PostHomeDto>> GetPostsHome(string ownUserId, int page, int pageSize)
         {
+            int skip = (page - 1) * pageSize;
             var followersIds = await _dbContext.Followers
-               .Where(f => f.FollowerId.ToString() == ownUserId)
-               .Select(f => f.FollowingId.ToString())
-               .ToListAsync();
+                .Where(f => f.FollowerId.ToString() == ownUserId)
+                .Select(f => f.FollowingId.ToString())
+                .ToListAsync();
 
             followersIds.Add(ownUserId);
 
             var postsWithImages = await _dbContext.Posts
                 .Where(post => followersIds.Contains(post.UserId))
                 .Include(post => post.PostImages)
+                .Include(post => post.User)
+                    .ThenInclude(user => user.ImageProfile)
+                .Select(post => new Models.DTO.Posts.PostHomeDto
+                {
+                    Id = post.Id,
+                    Caption = post.Caption,
+                    CreatedAt = post.CreatedAt,
+                    Images = post.PostImages.Select(image => new ImageDto
+                    {
+                        Id = image.Id,
+                        FilePath = image.FilePath,
+                    }).ToList(),
+                    User = new Models.DTO.Posts.PostHomeUser
+                    {
+                        ImageProfile = post.User.ImageProfile.FilePath,
+                        Username = post.User.UserName,
+                    },
+                    CommentsCount = post.Comments.Count,
+                    FirstLikeUsername = post.Likes.OrderBy(like => like.CreatedAt)
+                                                  .Select(like => like.User.UserName)
+                                                  .FirstOrDefault(),
+                    HasMoreLikes = post.Likes.Count > 1
+                })
+                .OrderByDescending(post => post.CreatedAt)
+                .Skip(skip)
+                .Take(pageSize)
                 .ToListAsync();
 
             return postsWithImages;
@@ -186,6 +211,23 @@ namespace social_oc_api.Repositories
             return commentDto;
         }
 
+        public async Task<List<UserListDto>?> LikesUsers(Guid? PostId, string OwnUserId, int page, int pageSize)
+        {
+            int skip = (page - 1) * pageSize;
 
+            return await _dbContext.Likes
+            .Where(like => like.PostId == PostId)
+            .Select(like => new UserListDto
+            {
+                Username = like.User.UserName,
+                Name = like.User.Name,
+                ImageProfile = like.User.ImageProfile.FilePath,
+                AreYouFollowing = _dbContext.Followers
+                    .Any(f => f.FollowerId == OwnUserId && f.FollowingId == like.User.Id),
+            })
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync();
+            }
     }
 }
