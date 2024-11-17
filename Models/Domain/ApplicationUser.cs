@@ -18,5 +18,9 @@ namespace social_oc_api.Models.Domain
 
         public ICollection<Like> Likes { get; set; }
 
+        public ICollection<Follower> Followers { get; set; }
+
+        public ICollection<Follower> Following { get; set; }
+
     }
 }

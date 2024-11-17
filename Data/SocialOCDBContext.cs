@@ -42,6 +42,21 @@ namespace social_oc_api.Data
                 .HasForeignKey<UserImage>(ui => ui.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Follower>(entity =>
+            {
+                // Relación para el Follower (quién sigue)
+                entity.HasOne(f => f.FollowerUser)
+                      .WithMany(u => u.Followers) // Relación de "seguidores"
+                      .HasForeignKey(f => f.FollowerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Relación para el Following (a quién sigue)
+                entity.HasOne(f => f.FollowingUser)
+                      .WithMany() // No necesitas otra colección aquí
+                      .HasForeignKey(f => f.FollowingId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
             modelBuilder.Entity<Post>()
                 .HasMany(p => p.PostImages)
                 .WithOne(pi => pi.Post)

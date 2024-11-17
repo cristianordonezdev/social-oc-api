@@ -95,5 +95,27 @@ namespace social_oc_api.Controllers
             return Ok(userProfileDto);
         }
 
+
+        [HttpGet]
+        [Authorize]
+        [Route("{username}/{actionFollow}/", Name = "Get followers")]
+        public async Task<IActionResult> getFollowers([FromRoute] string username, [FromRoute] string actionFollow, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var profileUser = await _userRepository.GetProfile(username);
+            if (profileUser == null) { return NotFound(); }
+
+            var followsAction = await _userRepository.GetFollowerOrFollowing(profileUser.User.Id, actionFollow, userId, page, pageSize);
+
+            if (followsAction == null)
+            {
+                return BadRequest();
+            }
+            
+            return Ok(followsAction);
+        }
+
     }
 }

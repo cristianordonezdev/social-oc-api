@@ -88,5 +88,50 @@ namespace social_oc_api.Repositories.User
 
             return userDomain;
         }
+
+        public async Task<List<UserListDto>?> GetFollowerOrFollowing(string userId, string followAction, string OwnUserId, int page, int pageSize)
+        {
+            int skip = (page - 1) * pageSize;
+            if (followAction == "followers")
+            {
+                var followers = await _dbContext.Followers
+                    .Where(i => i.FollowingId == userId)
+                    .Include(i => i.FollowerUser)
+                        .Select(user => new UserListDto
+                        {
+                            Username = user.FollowerUser.UserName,
+                            Name = user.FollowerUser.Name,
+                            ImageProfile = user.FollowerUser.ImageProfile.FilePath,
+                            AreYouFollowing = _dbContext.Followers.Any(f => f.FollowerId == OwnUserId && f.FollowingId == user.FollowerId),
+                        })
+                    .OrderByDescending(like => like.AreYouFollowing)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return followers;
+            }
+            else if (followAction == "following")
+            {
+                var following = await _dbContext.Followers
+                    .Where(i => i.FollowerId == userId)
+                    .Include(i => i.FollowingUser)
+                        .Select(user => new UserListDto
+                        {
+                            Username = user.FollowingUser.UserName,
+                            Name = user.FollowingUser.Name,
+                            ImageProfile = user.FollowingUser.ImageProfile.FilePath,
+                            AreYouFollowing = _dbContext.Followers.Any(f => f.FollowerId == OwnUserId && f.FollowingId == user.FollowingId),
+                        })
+                    .OrderByDescending(like => like.AreYouFollowing)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+
+                return following;
+            }
+            else return null;
+        }
     }
 }
