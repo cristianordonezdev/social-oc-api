@@ -14,5 +14,6 @@
 
         public string ImageProfile { get; set; }
 
+        public bool IsPublic { get; set; }
     }
 }

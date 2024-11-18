@@ -21,14 +21,12 @@ namespace social_oc_api.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IUtils _utils;
         public UserController(IUserRepository userRepository, UserManager<ApplicationUser> userManage, IMapper mapper, IUtils utils)
         {
             _userRepository = userRepository;
-            _userManager = userManage;
             _mapper = mapper;
             _utils = utils;
         }
@@ -93,6 +91,19 @@ namespace social_oc_api.Controllers
     
             };
             return Ok(userProfileDto);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("{userId}", Name = "Get user by ID")]
+        public async Task<IActionResult> getUserByID([FromRoute] string userId)
+        {
+            var userDomain = await _userRepository.GetUserByUUID(userId);
+            if (userDomain == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<UserDto>(userDomain));
         }
 
 

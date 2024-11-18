@@ -1,4 +1,5 @@
 ﻿using social_oc_api.Models.Domain;
+using social_oc_api.Models.DTO.Followers;
 
 namespace social_oc_api.Repositories
 {
@@ -8,5 +9,8 @@ namespace social_oc_api.Repositories
 
         Task<Boolean> GetVisibility(string userId, string ownUserId);
 
+        Task<bool> HandleGetRequest(Follower follower);
+
+        Task<List<RequestFollowerDto>> GetListOfRequests(string userId, int page, int pageSize);
     }
 }

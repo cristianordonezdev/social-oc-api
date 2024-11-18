@@ -134,5 +134,11 @@ namespace social_oc_api.Repositories.User
             }
             else return null;
         }
+
+        public async Task<ApplicationUser?> GetUserByUUID(string userId)
+        {
+            var userDomain = await _dbContext.Users.FirstOrDefaultAsync(i => i.Id == userId);
+            return userDomain;
+        }
     }
 }
