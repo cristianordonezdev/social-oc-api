@@ -12,6 +12,13 @@ namespace social_oc_api.Repositories
         {
             _dbContext = dbContext;
         }
+
+        public async Task<Boolean> GetVisibility(string userId, string ownUserId)
+        {
+            var areYouFollowing = await _dbContext.Followers.AnyAsync(f => f.FollowerId == ownUserId && f.FollowingId == userId);
+            return areYouFollowing || (ownUserId == userId);
+        }
+
         public async Task<Follower?> ToggleFollowAction(Follower follower)
         {
             var followAction = await _dbContext.Followers.FirstOrDefaultAsync(i => i.FollowingId.Equals(follower.FollowingId) && i.FollowerId.Equals(follower.FollowerId));

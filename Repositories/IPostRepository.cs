@@ -17,9 +17,9 @@ namespace social_oc_api.Repositories
 
         Task<List<UserListDto>?> LikesUsers(Guid? PostId, string OwnUserId, int page, int pageSize);
 
-        Task<List<PostProfileDto>> GetPostsOf(Guid userId, int page, int pageSize);
+        Task<List<PostProfileDto>?> GetPostsOf(string userId, int page, int pageSize);
 
-        Task<PostDetailDto?> GetPostDetail(Guid postId);
+        Task<ResponsePostDetailDto?> GetPostDetail(Guid postId, string ownUserId);
 
         Task<Like?> LikePost(string userId, Guid postId);
 

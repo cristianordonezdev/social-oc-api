@@ -98,6 +98,7 @@ namespace social_oc_api.Repositories.User
                     .Include(i => i.FollowerUser)
                         .Select(user => new UserListDto
                         {
+                            UserId = user.FollowerUser.Id,
                             Username = user.FollowerUser.UserName,
                             Name = user.FollowerUser.Name,
                             ImageProfile = user.FollowerUser.ImageProfile.FilePath,
@@ -117,6 +118,7 @@ namespace social_oc_api.Repositories.User
                     .Include(i => i.FollowingUser)
                         .Select(user => new UserListDto
                         {
+                            UserId = user.FollowingUser.Id,
                             Username = user.FollowingUser.UserName,
                             Name = user.FollowingUser.Name,
                             ImageProfile = user.FollowingUser.ImageProfile.FilePath,

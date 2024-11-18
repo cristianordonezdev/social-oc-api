@@ -14,12 +14,14 @@ namespace social_oc_api.Repositories
     {
         private readonly SocialOCDBContext _dbContext;
         private readonly IImageRepository _imageRepository;
+        private readonly IFollowerRepository _followerRepository;
         private readonly IUtils _utils;
-        public SQLPostRepository(SocialOCDBContext dbContext, IImageRepository imageRepository, IUtils utils)
+        public SQLPostRepository(SocialOCDBContext dbContext, IImageRepository imageRepository, IUtils utils, IFollowerRepository followerRepository)
         {
             _dbContext = dbContext;
             _imageRepository = imageRepository;
             _utils = utils;
+            _followerRepository = followerRepository;
         }
         public async Task<Post> CreatePost(Post post, List<IFormFile> files)
         {
@@ -106,11 +108,10 @@ namespace social_oc_api.Repositories
             return postsWithImages;
         }
 
-        public async Task<List<Models.DTO.Posts.PostProfileDto>> GetPostsOf(Guid userId, int page, int pageSize)
+        public async Task<List<Models.DTO.Posts.PostProfileDto>?> GetPostsOf(string userId, int page, int pageSize)
         {
 
             int skip = (page - 1) * pageSize;
-
             var postProfiles = await _dbContext.Posts
                 .Where(post => post.UserId == userId.ToString())
                 .OrderByDescending(post => post.CreatedAt)
@@ -124,7 +125,6 @@ namespace social_oc_api.Repositories
                     CommentsCount = _dbContext.Comments.Count(comment => comment.PostId == post.Id)
                 })
                 .ToListAsync();
-
             return postProfiles;
         }
 
@@ -198,6 +198,7 @@ namespace social_oc_api.Repositories
             .Where(like => like.PostId == PostId)
             .Select(like => new UserListDto
             {
+                UserId = like.User.Id, 
                 Username = like.User.UserName,
                 Name = like.User.Name,
                 ImageProfile = like.User.ImageProfile.FilePath,
@@ -247,7 +248,7 @@ namespace social_oc_api.Repositories
 
             return null;
         }
-        public async Task<PostDetailDto?> GetPostDetail(Guid postId)
+        public async Task<ResponsePostDetailDto?> GetPostDetail(Guid postId, string ownUserId)
         {
             var postDomain = await _dbContext.Posts
             .Where(i => i.Id == postId)
@@ -264,9 +265,10 @@ namespace social_oc_api.Repositories
                 }).ToList(),
                 User = new UserDetailDto
                 {
+                    UserId = post.User.Id,
                     UserName = post.User.UserName,
                     ImageProfile = post.User.ImageProfile.FilePath,
-
+                    IsPublic = post.User.IsPublic,
                 },
                 FirstLikeUsername = post.Likes.OrderBy(like => like.CreatedAt)
                                    .Select(like => like.User.UserName)
@@ -274,7 +276,11 @@ namespace social_oc_api.Repositories
                 HasMoreLikes = post.Likes.Count > 1
             })
                 .FirstOrDefaultAsync();
-            return postDomain;
+
+            if (postDomain == null) { return null; }
+            bool isVisible = postDomain.User.IsPublic ? postDomain.User.IsPublic : await _followerRepository.GetVisibility(postDomain.User.UserId, ownUserId);
+
+            return new ResponsePostDetailDto { Post = postDomain, IsVisible = isVisible};
         }
         public async Task<PostDetailDto?> UpdatePost(string captionUpdated, Guid postId, string ownUserId)
         {
@@ -285,7 +291,7 @@ namespace social_oc_api.Repositories
             postDomain.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync();
 
-            var postDomainUpdated = await GetPostDetail(postDomain.Id);
+            var postDomainUpdated = GetPostDetail(postDomain.Id, ownUserId).Result?.Post;
             return postDomainUpdated;
         }
         public async Task<Boolean?> deleteImagePost(Guid imageId, string OwnUserId)

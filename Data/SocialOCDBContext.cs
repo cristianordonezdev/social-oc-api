@@ -18,6 +18,7 @@ namespace social_oc_api.Data
         public DbSet<PostImage> PostImages { get; set; }
         public DbSet<UserImage> UserImages { get; set; }
         public DbSet<Follower> Followers { get; set; }
+        public DbSet<RequestFollower> RequestFollowers { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Comment> Comments { get; set; }
 
@@ -56,6 +57,12 @@ namespace social_oc_api.Data
                       .HasForeignKey(f => f.FollowingId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Entity<RequestFollower>()
+                .HasOne(u => u.FollowerUser)
+                .WithMany()
+                .HasForeignKey(ui => ui.FollowerId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Post>()
                 .HasMany(p => p.PostImages)

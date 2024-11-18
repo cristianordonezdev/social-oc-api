@@ -8,6 +8,7 @@ using social_oc_api.Repositories;
 using social_oc_api.Utils;
 using social_oc_api.Repositories.User;
 using social_oc_api.Models.DTO.Auth;
+using social_oc_api.Models.Responses;
 namespace social_oc_api.Controllers
 {
     [Route("api/[controller]")]
@@ -17,13 +18,15 @@ namespace social_oc_api.Controllers
         private readonly IMapper _mapper;
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IFollowerRepository _followerRepository;
         private readonly IUtils _utils;
-        public PostController(IMapper mapper, IPostRepository postRepository, IUtils utils, IUserRepository userRepository)
+        public PostController(IMapper mapper, IPostRepository postRepository, IUtils utils, IUserRepository userRepository, IFollowerRepository followerRepository)
         {
             _mapper = mapper;
             _postRepository = postRepository;
             _utils = utils;
             _userRepository = userRepository;
+            _followerRepository = followerRepository;
         }
 
 
@@ -45,13 +48,27 @@ namespace social_oc_api.Controllers
         [Route("Of/{username}", Name = "GetPostsOf")]
         public async Task<IActionResult> getPostsOf([FromRoute] string username, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
             if (string.IsNullOrEmpty(username)) { return NotFound(); }
 
             var profileUser = await _userRepository.GetProfile(username);
             if (profileUser == null) { return NotFound(); }
 
-            var postsDomain = await _postRepository.GetPostsOf(new Guid(profileUser.User.Id), page, pageSize);
-            return Ok(postsDomain);
+            bool isVisible = profileUser.User.IsPublic ? profileUser.User.IsPublic : await _followerRepository.GetVisibility(profileUser.User.Id, userId);
+
+            if (isVisible)
+            {
+                var postsDomain = await _postRepository.GetPostsOf(profileUser.User.Id, page, pageSize);
+                return Ok(postsDomain);
+            }
+
+            return Ok(new OkResponse
+            {
+                Status = 200,
+                Message = "Privated Profile",
+                Code = "privated_profile"
+            });
         }
 
         [HttpGet]
@@ -72,10 +89,23 @@ namespace social_oc_api.Controllers
         [Route("{postId}", Name = "getPostDetail")]
         public async Task<IActionResult> postDetail([FromRoute] string postId)
         {
-            var post = await _postRepository.GetPostDetail(new Guid(postId));
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var post = await _postRepository.GetPostDetail(new Guid(postId), userId);
             if (post == null) { return NotFound(); }
 
-            return Ok(post); ;
+            if (post.IsVisible)
+            {
+                return Ok(post); ;
+            }
+
+            return Ok(new OkResponse
+            {
+                Status = 200,
+                Message = "Privated Profile",
+                Code = "privated_profile"
+            });
         }
 
         [HttpGet]
