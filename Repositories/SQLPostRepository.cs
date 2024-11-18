@@ -36,7 +36,7 @@ namespace social_oc_api.Repositories
                     PostId = post.Id,
                 };
 
-               var imageUploadedDomain = await _imageRepository.UploadImage(imageDomain, "PostImages");
+               await _imageRepository.UploadImage(imageDomain, "PostImages");
             }
             return post;
         }

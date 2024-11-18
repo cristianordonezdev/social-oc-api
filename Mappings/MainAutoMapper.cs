@@ -3,7 +3,7 @@ using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Images;
 using social_oc_api.Models.DTO.Auth;
 using social_oc_api.Models.DTO.Posts;
-using social_oc_api.Models.DTO.User;
+using social_oc_api.Models.DTO.Followers;
 
 namespace social_oc_api.Mappings
 {
@@ -18,6 +18,8 @@ namespace social_oc_api.Mappings
 
             CreateMap<PostCreateDto, Post>().ReverseMap();
             CreateMap<Post, PostDto>().ReverseMap();
+            CreateMap<Follower, FollowerDto>().ReverseMap();
+
             CreateMap<Like, LikePostDto>().ReverseMap();
  
             // Mapeo del Post a PostDto
