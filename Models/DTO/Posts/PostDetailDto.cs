@@ -15,7 +15,18 @@
 
     public class UserDetailDto
     {
+        public string UserId { get; set; }
         public string UserName { get; set; }
         public string ImageProfile { get; set; }
+
+        public bool IsPublic { get; set; }
+    }
+
+    public class ResponsePostDetailDto
+    {
+        public PostDetailDto Post { get; set; }
+
+        public bool IsVisible { get; set; }
+
     }
 }

@@ -13,6 +13,8 @@ namespace social_oc_api.Models.Domain
 
         public DateTime? UpdatedAt { get; set; }
 
+        public Boolean IsPublic { get; set; } = true;
+
         public virtual UserImage ImageProfile { get; set; }
         public ICollection<Post> Posts { get; set; }
 
@@ -21,6 +23,8 @@ namespace social_oc_api.Models.Domain
         public ICollection<Follower> Followers { get; set; }
 
         public ICollection<Follower> Following { get; set; }
+
+        public ICollection<RequestFollower> RequestFollowers { get; set; }
 
     }
 }
