@@ -70,7 +70,7 @@ namespace social_oc_api.Repositories
             int skip = (page - 1) * pageSize;
 
             var requests = await _dbContext.RequestFollowers
-                .Where(i => i.FollowerId == userId)
+                .Where(i => i.FollowingId == userId)
                 .Skip(skip)
                 .Take(pageSize)
                 .Include(i => i.FollowerUser)
@@ -88,6 +88,36 @@ namespace social_oc_api.Repositories
                 })
                 .ToListAsync();
             return requests;
+        }
+
+        public async Task<bool?> deleteRequest(Guid requestId, string userId)
+        {
+            var requestDomain = await _dbContext.RequestFollowers.FirstOrDefaultAsync(f => f.Id == requestId && f.FollowerId == userId);
+            if (requestDomain == null) { return null; }
+
+            _dbContext.Remove(requestDomain);
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<Follower?> acceptRequest(Guid requestId, string userId)
+        {
+            var requestDomain = await _dbContext.RequestFollowers.FirstOrDefaultAsync(f => f.Id == requestId && f.FollowingId == userId);
+            if (requestDomain == null) { return null; }
+
+            var follower = new Follower
+            {
+                FollowerId = requestDomain.FollowerId,
+                FollowingId = userId,
+            };
+
+            var followAction = await ToggleFollowAction(follower);
+
+            _dbContext.Remove(requestDomain);
+            await _dbContext.SaveChangesAsync();
+
+            return followAction;
         }
     }
 }

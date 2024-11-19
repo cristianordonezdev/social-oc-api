@@ -79,5 +79,36 @@ namespace social_oc_api.Controllers
 
             return Ok(requests);
         }
+
+        [HttpDelete]
+        [Route("requests/{requestId}", Name = "Delete Request")]
+        [Authorize]
+
+        public async Task<IActionResult> deleteRequest([FromRoute] Guid requestId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var requests = await _followerRepository.deleteRequest(requestId, userId);
+            if (requests == null) return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpGet]
+        [Route("requests/accept/{requestId}", Name = "Accept Request")]
+        [Authorize]
+        public async Task<IActionResult> acceptRequest([FromRoute] Guid requestId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var requests = await _followerRepository.acceptRequest(requestId, userId);
+            if (requests == null) return NotFound();
+
+            return Ok(_mapper.Map<FollowerDto>(requests));
+        }
     }
 }
