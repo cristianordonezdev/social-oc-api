@@ -61,7 +61,7 @@ namespace social_oc_api.Data
             modelBuilder.Entity<RequestFollower>()
                 .HasOne(u => u.FollowerUser)
                 .WithMany()
-                .HasForeignKey(ui => ui.FollowingId)
+                .HasForeignKey(ui => ui.FollowerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Post>()

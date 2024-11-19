@@ -12,5 +12,9 @@ namespace social_oc_api.Repositories
         Task<bool> HandleGetRequest(Follower follower);
 
         Task<List<RequestFollowerDto>> GetListOfRequests(string userId, int page, int pageSize);
+
+        Task<bool?> deleteRequest(Guid requestId, string userId);
+
+        Task<Follower?> acceptRequest(Guid requestId, string userId);
     }
 }
