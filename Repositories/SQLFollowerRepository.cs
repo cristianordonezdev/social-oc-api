@@ -92,7 +92,7 @@ namespace social_oc_api.Repositories
 
         public async Task<bool?> deleteRequest(Guid requestId, string userId)
         {
-            var requestDomain = await _dbContext.RequestFollowers.FirstOrDefaultAsync(f => f.Id == requestId && f.FollowerId == userId);
+            var requestDomain = await _dbContext.RequestFollowers.FirstOrDefaultAsync(f => f.Id == requestId && f.FollowingId == userId);
             if (requestDomain == null) { return null; }
 
             _dbContext.Remove(requestDomain);

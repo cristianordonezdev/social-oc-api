@@ -106,6 +106,19 @@ namespace social_oc_api.Controllers
             return Ok(_mapper.Map<UserDto>(userDomain));
         }
 
+        [HttpPut]
+        [Authorize]
+        [Route("", Name = "Update user")]
+        public async Task<IActionResult> updateUser([FromBody] UpdateUser updateUser)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
+
+            var userDomain = await _userRepository.UpdateUser(userId, updateUser);
+   
+            return Ok(_mapper.Map<UserDto>(userDomain));
+        }
+
 
         [HttpGet]
         [Authorize]

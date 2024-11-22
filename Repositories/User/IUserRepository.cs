@@ -14,6 +14,9 @@ namespace social_oc_api.Repositories.User
 
         Task<ApplicationUser?> GetUserByUUID(string userId);
 
+        Task<ApplicationUser> UpdateUser(string userId, UpdateUser updateUser);
+
+
         Task<List<UserListDto>?> GetFollowerOrFollowing(string userId, string followAction, string OwnUserId, int page, int pageSize);
 
     }

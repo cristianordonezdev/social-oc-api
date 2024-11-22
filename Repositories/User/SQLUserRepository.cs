@@ -140,5 +140,18 @@ namespace social_oc_api.Repositories.User
             var userDomain = await _dbContext.Users.FirstOrDefaultAsync(i => i.Id == userId);
             return userDomain;
         }
+
+        public async Task<ApplicationUser> UpdateUser(string userId, UpdateUser updateUser)
+        {
+            var userDomain = await _dbContext.Users.FirstOrDefaultAsync(_ => _.Id == userId);
+
+            userDomain.Name = updateUser.Name;
+            userDomain.IsPublic = updateUser.IsPublic;
+            userDomain.Description = updateUser.Description;
+
+            await _dbContext.SaveChangesAsync();
+
+            return userDomain;
+        }
     }
 }
