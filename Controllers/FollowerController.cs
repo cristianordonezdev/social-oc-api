@@ -40,6 +40,7 @@ namespace social_oc_api.Controllers
                 return Unauthorized();
 
             var userToFollow = await _userRepository.GetUserByUUID(followingId);
+            var areYouFollowing = await _followerRepository.GetVisibility(followingId, userId);
             if (userToFollow == null)
                 return NotFound();
 
@@ -49,7 +50,7 @@ namespace social_oc_api.Controllers
                 FollowingId = followingId,
             };
 
-            if (userToFollow.IsPublic)
+            if (userToFollow.IsPublic || areYouFollowing)
             {
                 var followerDomain = await _followerRepository.ToggleFollowAction(follower);
                 return Ok(followerDomain == null ? followerDomain : _mapper.Map<FollowerDto>(followerDomain));
