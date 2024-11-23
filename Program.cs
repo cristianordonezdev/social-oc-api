@@ -10,9 +10,14 @@ using social_oc_api.Repositories;
 using social_oc_api.Repositories.User;
 using social_oc_api.Utils;
 using System.Text;
+using social_oc_api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 // Agregar servicios a la aplicación
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -24,6 +29,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDataProtection();
+builder.Services.AddSignalR();
 
 // Configurar el DbContext antes de construir la aplicación
 builder.Services.AddDbContext<SocialOCDBContext>(options =>
@@ -126,7 +132,6 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 
-
 // Configurar middlewares en el pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -150,5 +155,9 @@ app.UseStaticFiles(new StaticFileOptions
 
 // Mapea los controladores
 app.MapControllers();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("¡La aplicación se ha iniciado correctamente!");
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

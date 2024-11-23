@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
+using social_oc_api.Hubs;
 
 namespace social_oc_api.Controllers
 {
@@ -24,8 +26,9 @@ namespace social_oc_api.Controllers
         private readonly ITokenRepository tokenRepository;
         private readonly IUtils _utils;
         private readonly IMapper _mapper;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public AuthController(UserManager<ApplicationUser> userManager, ITokenRepository tokenRepository, IUtils utils, IMapper mapper)
+        public AuthController(UserManager<ApplicationUser> userManager, ITokenRepository tokenRepository, IUtils utils, IMapper mapper, IHubContext<ChatHub> hubContext)
         {
             this.userManager = userManager;
             this.tokenRepository = tokenRepository;
