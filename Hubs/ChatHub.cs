@@ -13,7 +13,8 @@ namespace social_oc_api.Hubs
         }
         public async Task SendMessage(string user, string message)
         {
-            _logger.LogInformation("User-----------------------------------------------------------------------------");
+/*            _logger.LogInformation("userrr ---");
+*/            _logger.LogInformation("User: {User} - Message: {Message}", user, message);
             await Clients.All.SendAsync("ReceiveMessage", user, message);
         }
     }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using social_oc_api.Models.Domain;
 using social_oc_api.Models.Domain.Auth;
+using social_oc_api.Models.Domain.Chat;
 using social_oc_api.Models.Domain.Images;
 
 namespace social_oc_api.Data
@@ -21,6 +22,8 @@ namespace social_oc_api.Data
         public DbSet<RequestFollower> RequestFollowers { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,15 +48,15 @@ namespace social_oc_api.Data
 
             modelBuilder.Entity<Follower>(entity =>
             {
-                // Relación para el Follower (quién sigue)
+                // relation for follower (who follows)
                 entity.HasOne(f => f.FollowerUser)
-                      .WithMany(u => u.Followers) // Relación de "seguidores"
+                      .WithMany(u => u.Followers) // relation of "followers"
                       .HasForeignKey(f => f.FollowerId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // Relación para el Following (a quién sigue)
+                // relation for following (who following)
                 entity.HasOne(f => f.FollowingUser)
-                      .WithMany() // No necesitas otra colección aquí
+                      .WithMany()
                       .HasForeignKey(f => f.FollowingId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
@@ -80,6 +83,26 @@ namespace social_oc_api.Data
                 .HasMany(p => p.Comments)
                 .WithOne(pi => pi.Post)
                 .HasForeignKey(pi => pi.PostId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relationship between conversation and message
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Conversation)
+                .WithMany()
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // relationship between conversation and user
+            modelBuilder.Entity<Conversation>()
+                .HasOne(c => c.ParticipantOne)
+                .WithMany()
+                .HasForeignKey(c => c.ParticipantOneId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Conversation>()
+                .HasOne(c => c.ParticipantSecond)
+                .WithMany()
+                .HasForeignKey(c => c.ParticipantSecondId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 
