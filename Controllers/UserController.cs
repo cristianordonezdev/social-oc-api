@@ -83,6 +83,7 @@ namespace social_oc_api.Controllers
 
             var userProfileDto = new UserProfileDto
             {
+                Id = profileUser.User.Id,
                 Name = profileUser.User.Name,
                 UserName = profileUser.User.UserName,
                 Description = profileUser.User.Description,
