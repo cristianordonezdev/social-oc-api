@@ -4,6 +4,8 @@ using social_oc_api.Models.Domain.Images;
 using social_oc_api.Models.DTO.Auth;
 using social_oc_api.Models.DTO.Posts;
 using social_oc_api.Models.DTO.Followers;
+using social_oc_api.Models.Domain.Chat;
+using social_oc_api.Models.DTO.Chats;
 
 namespace social_oc_api.Mappings
 {
@@ -19,6 +21,8 @@ namespace social_oc_api.Mappings
             CreateMap<PostCreateDto, Post>().ReverseMap();
             CreateMap<Post, PostDto>().ReverseMap();
             CreateMap<Follower, FollowerDto>().ReverseMap();
+            CreateMap<Conversation, ConversationDto>().ReverseMap();
+
 
             CreateMap<Like, LikePostDto>().ReverseMap();
  

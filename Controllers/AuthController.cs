@@ -106,7 +106,7 @@ namespace social_oc_api.Controllers
                         {
                             Token = jwtToken,
                             RefreshToken = refreshToken,
-                            NameUser = user.UserName
+                            NameUser = user.UserName,
                         };
 
                         return Ok(response);

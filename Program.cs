@@ -11,6 +11,7 @@ using social_oc_api.Repositories.User;
 using social_oc_api.Utils;
 using System.Text;
 using social_oc_api.Hubs;
+using social_oc_api.Repositories.Chat;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,7 +98,7 @@ builder.Services.AddScoped<IPostRepository, SQLPostRepository>();
 builder.Services.AddScoped<IImageRepository, SQLImageRepository>();
 builder.Services.AddScoped<IFollowerRepository, SQLFollowerRepository>();
 builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
-
+builder.Services.AddScoped<IConversationRepository, SQLConversationRepository>();
 builder.Services.AddScoped<IUtils, Utils>();
 
 //REGISTERING MAPPING ==========================================

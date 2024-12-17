@@ -5,6 +5,7 @@ namespace social_oc_api.Models.DTO.User
 {
     public class UserProfileDto
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string UserName { get; set; }
         public string? ImageProfile { get; set; }
