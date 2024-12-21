@@ -24,12 +24,12 @@ namespace social_oc_api.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetConversations()
+        public async Task<IActionResult> GetConversations([FromQuery] int page = 1, [FromQuery] int pageSize = 1)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) { return Unauthorized(); }
 
-            var conversationsDomains = await _conversationRepository.GetConversations(userId);
+            var conversationsDomains = await _conversationRepository.GetConversations(userId, page, pageSize);
             return Ok(conversationsDomains);
         }
 

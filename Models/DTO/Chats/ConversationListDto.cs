@@ -4,6 +4,8 @@
     {
         public Guid Id { get; set; }
 
+        public string TokenConversation {  get; set; }
+
         public ConversationParticipantSecond ParticipantSecond { get; set; }
 
         public MessageList MessageList { get; set; }

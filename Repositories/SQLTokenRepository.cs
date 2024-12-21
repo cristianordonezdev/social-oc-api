@@ -46,6 +46,28 @@ namespace social_oc_api.Repositories
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public string GenerateConversationToken(Guid conversationId, string[] participants)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+                {
+                    new Claim("conversationId", conversationId.ToString()),
+                    new Claim("participants", string.Join(",", participants))
+                };
+
+            var token = new JwtSecurityToken(
+                issuer: configuration["Jwt:Issuer"],
+                audience: configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
             try
