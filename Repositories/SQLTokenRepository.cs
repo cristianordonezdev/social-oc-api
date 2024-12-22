@@ -19,6 +19,18 @@ namespace social_oc_api.Repositories
             this.configuration = configuration;
             this._db_context = dbContext;
         }
+
+        public bool AreYouFromConversation(string userId, string conversationToken)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(conversationToken);
+
+            var conversationId = jwtToken.Claims.First(claim => claim.Type == "conversationId").Value;
+            var participants = jwtToken.Claims.First(claim => claim.Type == "participants").Value.Split(',');
+
+            return participants.Contains(userId);
+        }
+
         public string CreateJWTToken(IdentityUser user, List<string> roles, int minutes)
         {
             var claims = new List<Claim>

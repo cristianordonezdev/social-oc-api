@@ -1,10 +1,8 @@
-﻿namespace social_oc_api.Models.Domain.Chat
+﻿namespace social_oc_api.Models.DTO.Chats
 {
-    public class Message
+    public class MessageDto
     {
         public Guid Id { get; set; }
-
-        public Guid ConversationId { get; set; }
 
         public string SenderId { get; set; }
 
@@ -13,9 +11,5 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsRead { get; set; } = false;
-
-        public ApplicationUser User { get; set; }
-
-        public Conversation Conversation { get; set; }
     }
 }

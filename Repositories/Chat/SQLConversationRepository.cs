@@ -34,15 +34,15 @@ namespace social_oc_api.Repositories.Chat
             int skip = (page - 1) * pageSize;
 
             var conversations = await _dbContext.Conversations.Include(c => c.ParticipantSecond)
-                .Where(i => i.ParticipantOneId == userOneId)
+                .Where(i => i.ParticipantOneId == userOneId || i.ParticipantSecondId == userOneId)
                 .Select(i => new ConversationListDto
                 {
                     Id = i.Id,
                     ParticipantSecond = new ConversationParticipantSecond
                     {
-                        Username = i.ParticipantSecond.UserName,
-                        Name = i.ParticipantSecond.Name,
-                        ImageProfile = i.ParticipantSecond.ImageProfile.FilePath
+                        Username = userOneId == i.ParticipantOneId ? i.ParticipantSecond.UserName : i.ParticipantOne.UserName,
+                        Name = userOneId == i.ParticipantOneId ? i.ParticipantSecond.Name : i.ParticipantOne.Name,
+                        ImageProfile = userOneId == i.ParticipantOneId ? i.ParticipantSecond.ImageProfile.FilePath : i.ParticipantOne.ImageProfile.FilePath,
                     },
                     TokenConversation = _tokenRepository.GenerateConversationToken(i.Id, new[] {i.ParticipantOneId, i.ParticipantSecondId}),
 
@@ -58,12 +58,10 @@ namespace social_oc_api.Repositories.Chat
             {
                 var messageDomain = await _dbContext.Messages
                     .Where(m => m.ConversationId == conversations[i].Id)
-                    .Skip(skip)
-                    .Take(pageSize)
-                    .OrderBy(i => i.CreatedAt)
+                    .OrderByDescending(i => i.CreatedAt)
                     .ToListAsync();
-
-                if (messagesDomain.Count > 0)
+                
+                if (messageDomain.Count > 0)
                 {
                     conversations[i].MessageList = new MessageList
                     {

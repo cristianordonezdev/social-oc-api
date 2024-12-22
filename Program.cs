@@ -99,6 +99,7 @@ builder.Services.AddScoped<IImageRepository, SQLImageRepository>();
 builder.Services.AddScoped<IFollowerRepository, SQLFollowerRepository>();
 builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
 builder.Services.AddScoped<IConversationRepository, SQLConversationRepository>();
+builder.Services.AddScoped<IMessageRepository, SQLMessageRepository>();
 builder.Services.AddScoped<IUtils, Utils>();
 
 //REGISTERING MAPPING ==========================================
