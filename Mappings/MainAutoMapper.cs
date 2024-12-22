@@ -22,6 +22,7 @@ namespace social_oc_api.Mappings
             CreateMap<Post, PostDto>().ReverseMap();
             CreateMap<Follower, FollowerDto>().ReverseMap();
             CreateMap<Conversation, ConversationDto>().ReverseMap();
+            CreateMap<Message, MessageDto>().ReverseMap();
 
 
             CreateMap<Like, LikePostDto>().ReverseMap();

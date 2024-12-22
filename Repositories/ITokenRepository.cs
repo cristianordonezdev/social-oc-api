@@ -15,5 +15,7 @@ namespace social_oc_api.Repositories
         Task<RefreshToken?>  GetRefreshToken(string UserId, string Token);
 
         string GenerateConversationToken(Guid conversationId, string[] participants);
+
+        bool AreYouFromConversation(string userId, string conversationToken);
     }
 }
